@@ -1,4 +1,531 @@
 <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KnowMap - Plataforma de Conhecimento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --white: #fff;
+      --primary: #508be6;
+      --secondary: #bdbff7;
+      --success: #62d4b6;
+      --text: #272838;
+      --gray: #b6b6c3;
+      --card: #f3f5fa;
+      --rounded: 16px;
+      --sidebar-width: 230px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0;}
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--white);
+      border-right: 1px solid #e3e5ee;
+      padding:  36px 0 0 0;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      z-index: 10;
+    }
+    .sidebar nav {
+      width: 100%;
+      margin-top: 48px;
+    }
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      padding: 12px 36px;
+      font-size: 1.07rem;
+      color: var(--text);
+      text-decoration: none;
+      border-left: 4px solid transparent;
+      transition: 0.18s;
+      gap: 16px;
+      font-weight: 500;
+    }
+    .sidebar nav a.active, .sidebar nav a:hover {
+      background: var(--card);
+      color: var(--primary);
+      border-left: 4px solid var(--primary);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.45rem;
+      color: var(--primary);
+      letter-spacing: 1px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .header {
+      width: calc(100% - var(--sidebar-width));
+      margin-left: var(--sidebar-width);
+      position: fixed; top: 0; left: 0;
+      height: 64px;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e3e5ee;
+      padding: 0 48px 0 36px;
+      z-index: 99;
+    }
+    .search-global {
+      background: var(--bg);
+      border: none;
+      padding: 9px 16px;
+      border-radius: var(--rounded);
+      width: 310px;
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      margin-right: 16px;
+      transition: 0.17s;
+      border: 1px solid transparent;
+    }
+    .search-global:focus {
+      border: 1.8px solid var(--primary);
+      background: #f0f5fe;
+    }
+    .avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #bdbff7 0%, #508be6 100%);
+      display: flex;
+      align-items: center; justify-content: center;
+      color: var(--white); font-weight: bold;
+      font-size: 1.15rem;
+      cursor: pointer;
+      position: relative;
+    }
+    /* --- MAIN --- */
+    main {
+      flex: 1;
+      margin-top: 64px;
+      margin-left: var(--sidebar-width);
+      padding: 38px 48px 48px 48px;
+      min-height: 100vh;
+    }
+    /* Biblioteca de Procedimentos */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 22px;
+      margin-top: 36px;
+    }
+    .proc-card {
+      background: var(--white);
+      border-radius: var(--rounded);
+      padding: 28px 22px 20px 22px;
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: 23px;
+      box-shadow: 0 2px 12px rgba(94,125,220,0.07);
+      border: 1.5px solid #e3e5ee;
+      transition: box-shadow 0.14s;
+      cursor: pointer;
+    }
+    .proc-card:hover {
+      box-shadow: 0 8px 20px rgba(94,125,220,0.11);
+      border-color: var(--primary);
+    }
+    .proc-icon {
+      width: 37px; height: 37px;
+      background: var(--card);
+      border-radius: 50%;
+      display: flex;
+      align-items: center; justify-content: center;
+      color: var(--primary);
+      font-size: 1.23rem;
+    }
+    .proc-title {
+      font-weight: 600;
+      font-size: 1.13rem;
+      margin-bottom: 6px;
+    }
+    .proc-status {
+      font-size: 0.99rem;
+      background: var(--bg);
+      padding: 3px 12px;
+      border-radius: 999px;
+      color: var(--primary);
+      font-weight: 500;
+    }
+    /* --- Knowledge Map --- */
+    .map-section {
+      margin-top: 32px;
+    }
+    .map-title {
+      font-size: 1.41rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .map-desc {
+      color: var(--gray); font-size: 1.05rem; margin-bottom: 22px;
+    }
+    .knowledge-table {
+      width: 100%;
+      background: var(--white);
+      border-radius: var(--rounded);
+      box-shadow: 0 2px 12px rgba(94,125,220,0.07);
+      border-collapse: collapse;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .knowledge-table th, .knowledge-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #ececf4;
+      text-align: left;
+      font-size: 1.04rem;
+    }
+    .knowledge-table th {
+      background: #f1f4fb;
+      color: var(--primary);
+      font-size: 1.03rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .knowledge-table tr:hover td {
+      background: #f3f7fd;
+    }
+    .progress-bar {
+      background: #d0e5fb;
+      border-radius: 10px;
+      width: 100px; height: 9px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .progress-inner {
+      background: var(--primary);
+      height: 100%;
+      border-radius: 10px;
+    }
+    /* Botãos */
+    .button {
+      background: var(--primary);
+      color: var(--white)!important;
+      border: none;
+      border-radius: var(--rounded);
+      padding: 8px 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.18s;
+      outline: none;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .button:hover {
+      background: #356fc1;
+    }
+    .button.secondary {
+      background: var(--secondary);
+      color: var(--primary)!important;
+    }
+    .button.export {
+      float: right;
+      font-size: 0.95rem;
+      background: #e1eaff;
+      color: var(--primary)!important;
+      padding: 6px 14px;
+      border-radius: 7px;
+    }
+    .filter-bar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .filter-bar select {
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: 1px solid #dee2ee;
+      background: var(--white);
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .kpi-cards {
+      display: flex; gap: 22px; margin-bottom: 27px;
+      flex-wrap: wrap;
+    }
+    .kpi-card {
+      flex: 1;
+      min-width: 170px;
+      background: var(--white);
+      border-radius: var(--rounded);
+      padding: 22px 18px;
+      box-shadow: 0 2px 12px rgba(94,125,220,0.04);
+      display: flex; flex-direction: column;
+      gap: 7px;
+      align-items: flex-start;
+    }
+    .kpi-value { font-weight: 700; font-size: 1.4rem; color: var(--primary);}
+    .kpi-label { font-size: 1.07rem; color: var(--gray);}
+    /* Dashboard graphs - example */
+    .dashboard-graph {
+      background: var(--white);
+      border-radius: var(--rounded);
+      padding: 36px 18px;
+      margin-top: 16px;
+      min-height: 180px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray);
+      font-size: 1.03rem;
+      box-shadow: 0 2px 12px rgba(94,125,220,0.04);
+    }
+    /* Responsive */
+    @media (max-width: 980px) {
+      .header { padding: 0 18px;}
+      .search-global { width: 170px;}
+      main { padding: 28px 10px 32px 10px;}
+    }
+    @media (max-width: 720px) {
+      .sidebar { width: 62px; min-width: 52px;}
+      .sidebar nav a { justify-content: center; padding: 14px 13px; font-size: 0.84rem; }
+      .sidebar nav a span { display: none;}
+      .logo-text { display: none;}
+      .header { margin-left: 62px; width: calc(100% - 62px);}
+      main { margin-left: 62px; }
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none;}
+      .header { margin-left: 0; width: 100%; }
+      main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <svg width="32" height="32" fill="none" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#508be6"/><circle cx="30" cy="30" r="14" fill="#fff"/><rect x="16" y="28" width="28" height="4" rx="2" fill="#fff"/></svg>
+      <span class="logo-text">KnowMap</span>
+    </div>
+    <nav>
+      <a href="#biblioteca" class="active">
+        <span aria-hidden="true">
+        <!-- book icon outline -->
+        <svg width="24" height="24" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19a2 2 0 0 1 2-2h14" /><path d="M4 4h16v16" /><path d="M4 4v16" /></svg>
+        </span>
+        <span>Biblioteca de Procedimentos</span>
+      </a>
+      <a href="#mapa">
+        <span aria-hidden="true">
+        <!-- chart icon outline -->
+        <svg width="24" height="24" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="14" width="3" height="4"/><rect x="12" y="10" width="3" height="8"/><rect x="17" y="6" width="3" height="12"/></svg>
+        </span>
+        <span>Mapa de Conhecimentos</span>
+      </a>
+      <a href="#engajamento">
+        <span aria-hidden="true">
+        <!-- activity icon outline -->
+        <svg width="24" height="24" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12h4l3 7 4-14 3 7h4"/></svg>
+        </span>
+        <span>Monitoramento de Engajamento</span>
+      </a>
+    </nav>
+  </aside>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <svg width="28" height="28" fill="none" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="28" fill="#508be6"/><circle cx="30" cy="30" r="14" fill="#fff"/><rect x="16" y="28" width="28" height="4" rx="2" fill="#fff"/></svg>
+        <span class="logo-text">KnowMap</span>
+    </div>
+    <input class="search-global" type="text" placeholder="Pesquisar colaborador, tema, procedimento..."/>
+    <div class="avatar" title="Menu pessoal">LB</div>
+  </header>
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- BIBLIOTECA DE PROCEDIMENTOS (default) -->
+    <section id="biblioteca">
+      <h1 style="font-size:2rem;font-weight:700;letter-spacing:.5px;">Biblioteca de Procedimentos</h1>
+      <p style="color:var(--gray);margin-top:2px;">
+        Acesse rapidamente os principais procedimentos fiscais, contábeis e administrativos. Filtre por área ou pesquise por palavra-chave.
+      </p>
+      <div class="cards-grid">
+        <div class="proc-card">
+          <div class="proc-icon">
+            <!-- Tax icon (outline) -->
+            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div>
+            <div class="proc-title">Apuração Lucro Presumido</div>
+            <div class="proc-status" style="background: #e1eaff;color: var(--primary);">Em andamento</div>
+          </div>
+        </div>
+        <div class="proc-card">
+          <div class="proc-icon">
+            <!-- Sped icon (outline) -->
+            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2v8l7-4z"/><rect x="3" y="12" width="16" height="8" rx="2"/></svg>
+          </div>
+          <div>
+            <div class="proc-title">SPED Fiscal</div>
+            <div class="proc-status" style="background: #d3f3ea;color: #18bfa6;">Concluído</div>
+          </div>
+        </div>
+        <div class="proc-card">
+          <div class="proc-icon">
+            <!-- Payroll icon (outline) -->
+            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M16 9h.01"/><path d="M8 9h.01"/><path d="M12 13l-2 2h4z"/></svg>
+          </div>
+          <div>
+            <div class="proc-title">Folha de Pagamento</div>
+            <div class="proc-status" style="background: #fce7e8;color: #f35b68;">Não iniciado</div>
+          </div>
+        </div>
+        <div class="proc-card">
+          <div class="proc-icon">
+            <!-- Routine icon -->
+            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6"/></svg>
+          </div>
+          <div>
+            <div class="proc-title">Rotinas Administrativas</div>
+            <div class="proc-status" style="background: #e1eaff;color: var(--primary);">Em andamento</div>
+          </div>
+        </div>
+        <div class="proc-card">
+          <div class="proc-icon">
+            <!-- Financial icon -->
+            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+          </div>
+          <div>
+            <div class="proc-title">Conciliação Financeira</div>
+            <div class="proc-status" style="background: #d3f3ea;color: #18bfa6;">Concluído</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- MAPA DE CONHECIMENTO (invisible by default) -->
+    <section id="mapa" style="display:none;">
+      <div class="map-section">
+        <div class="map-title">Mapa de Conhecimentos da Equipe</div>
+        <div class="map-desc">
+          Visualize e compare o nível de domínio da sua equipe. Identifique pontos fortes e lacunas de conhecimento.
+        </div>
+        <div class="filter-bar">
+          <label>Filtrar colaborador:
+            <select>
+              <option>Todos</option>
+              <option>João Silva</option>
+              <option>Maria Rosa</option>
+              <option>Luana Braga</option>
+            </select>
+          </label>
+          <a href="#" class="button" style="font-size:0.96rem;">Adicionar conhecimento</a>
+          <a href="#" class="button export">Exportar CSV/Excel</a>
+        </div>
+        <table class="knowledge-table">
+          <tr>
+            <th>Nome</th>
+            <th>Cargo</th>
+            <th>Tema</th>
+            <th>Nível <span style="font-weight:400; font-size:0.92em;">(0-10)</span></th>
+          </tr>
+          <tr>
+            <td>João Silva</td>
+            <td>Analista Fiscal</td>
+            <td>SPED Fiscal</td>
+            <td><div class="progress-bar"><div class="progress-inner" style="width: 85%;"></div></div> 8,5</td>
+          </tr>
+          <tr>
+            <td>Maria Rosa</td>
+            <td>Contadora</td>
+            <td>Lucro Presumido</td>
+            <td><div class="progress-bar"><div class="progress-inner" style="width: 100%;background:var(--success)"></div></div> 10</td>
+          </tr>
+          <tr>
+            <td>Luana Braga</td>
+            <td>Auxiliar</td>
+            <td>Folha de Pagamento</td>
+            <td><div class="progress-bar"><div class="progress-inner" style="width: 54%;background:#f35b68"></div></div> 5,4</td>
+          </tr>
+        </table>
+        <div class="dashboard-graph">
+          [Gráfico de barras/radar interativo — exemplo visual]
+        </div>
+      </div>
+    </section>
+    <!-- DASHBOARD DE ENGAJAMENTO (invisible by default) -->
+    <section id="engajamento" style="display:none;">
+      <h2 style="font-size:1.41rem;font-weight:700;margin-bottom:8px;">Monitoramento de Engajamento</h2>
+      <p style="color:var(--gray); font-size:1.07rem;">
+        KPIs e evolução de consumo dos conteúdos, interações e engajamento por colaborador.
+      </p>
+      <div class="kpi-cards">
+        <div class="kpi-card">
+          <div class="kpi-label">Tempo total assistido</div>
+          <div class="kpi-value">19h 47min</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Top 3 mais ativos</div>
+          <div class="kpi-value">Maria, João, Luana</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Interações registro</div>
+          <div class="kpi-value">76</div>
+        </div>
+      </div>
+      <div class="dashboard-graph">
+        [Gráfico de evolução — exemplo visual]
+      </div>
+      <table class="knowledge-table" style="margin-top:32px;">
+        <tr>
+          <th>Colaborador</th>
+          <th>Tempo de vídeo</th>
+          <th>Interações</th>
+          <th>Assuntos mais buscados</th>
+        </tr>
+        <tr>
+          <td>Maria Rosa</td>
+          <td>7h 22m</td>
+          <td>31</td>
+          <td><span class="proc-status" style="background:#e1eaff;">SPED</span></td>
+        </tr>
+        <tr>
+          <td>João Silva</td>
+          <td>6h 54m</td>
+          <td>21</td>
+          <td><span class="proc-status" style="background:#d3f3ea;color:#18bfa6">Lucro Presumido</span></td>
+        </tr>
+        <tr>
+          <td>Luana Braga</td>
+          <td>5h 31m</td>
+          <td>15</td>
+          <td><span class="proc-status" style="background:#fce7e8;color:#f35b68">Folha Pgto</span></td>
+        </tr>
+      </table>
+    </section>
+  </main>
+</div>
+<script>
+  // Troca entre seções da landing page (menu lateral)
+  const links = document.querySelectorAll('.sidebar nav a');
+  const sections = ['biblioteca', 'mapa', 'engajamento'];
+  links.forEach((el, idx) => {
+    el.onclick = function(e) {
+      e.preventDefault();
+      links.forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+      sections.forEach(s =>{
+        document.getElementById(s).style.display = 'none';
+      });
+      document.getElementById(sections[idx]).style.display = '';
+    }
+  });
+</script>
+</body>
+</html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -486,6 +1013,7 @@
     </script>
 </body>
 </html>
+
 
 
 
