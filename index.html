@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KnowMap – Dashboard Estratégico</title>
+    <title>KnowMap – Plataforma de Gestão</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js para os gráficos -->
@@ -13,560 +13,479 @@
     <!-- Biblioteca de Ícones (Lucide) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Estilo customizado para animações e fontes */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Um cinza mais próximo de dashboards de BI */
-        }
-        .modal-backdrop, .tab-content { transition: all 0.3s ease-in-out; }
-        .modal-content { transition: all 0.3s ease-in-out; }
-        select:disabled { background-color: #e2e8f0; cursor: not-allowed; }
-        ::-webkit-scrollbar { width: 8px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; /* slate-50 */ }
+        .sidebar-link.active { background-color: #eef2ff; color: #4338ca; font-weight: 600; }
+        .sidebar-link.active i { color: #4f46e5; }
+        .view-content { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* Custom scrollbar for a polished look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #e2e8f0; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .sortable:hover { background-color: #f1f5f9; cursor: pointer; }
-        .tab.active { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
 
-        /* Estilos para Tabela Responsiva (Mobile) */
+        /* Estilos para Tabela Responsiva no Mapa de Conhecimentos */
         @media screen and (max-width: 767px) {
-            .responsive-table thead {
-                display: none;
+            .responsive-map-table thead { display: none; }
+            .responsive-map-table tr {
+                display: block; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+                box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05); padding: 0.5rem; background-color: white;
             }
-            .responsive-table tr {
-                display: block;
-                margin-bottom: 1rem;
-                border: 1px solid #e2e8f0;
-                border-radius: 0.75rem;
-                box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-                padding: 0.5rem;
+            .responsive-map-table td {
+                display: flex; justify-content: space-between; align-items: center; text-align: right;
+                padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9;
             }
-            .responsive-table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                text-align: right;
-                padding: 0.75rem 1rem;
-                border-bottom: 1px solid #f1f5f9;
-            }
-            .responsive-table td:last-child {
-                border-bottom: 0;
-            }
-            .responsive-table td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                text-align: left;
-                color: #475569; /* slate-600 */
-                padding-right: 1rem;
-            }
+            .responsive-map-table td:last-child { border-bottom: 0; }
+            .responsive-map-table td::before { content: attr(data-label); font-weight: 600; text-align: left; color: #475569; }
+        }
+        
+        /* Estilo para Notificação Toast */
+        #toast-notification {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            transform: translateX(200%);
+            transition: transform 0.5s ease-in-out;
+            z-index: 100;
+        }
+        #toast-notification.show {
+            transform: translateX(0);
         }
     </style>
 </head>
 <body class="antialiased text-slate-700">
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-        
-        <header class="mb-8 flex flex-col sm:flex-row justify-between sm:items-center">
-            <div>
-                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">KnowMap – Dashboard Estratégico</h1>
-                <p class="text-md text-slate-500 mt-1">Sua central de inteligência para gestão de competências.</p>
+    <div class="flex h-screen bg-slate-50">
+        <!-- Sidebar Lateral Fixa -->
+        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex-col flex-shrink-0 fixed lg:relative h-full lg:flex z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="px-6 py-5 flex items-center gap-3">
+                <i data-lucide="brain-circuit" class="text-indigo-600 h-8 w-8"></i>
+                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tighter">KnowMap</h1>
             </div>
-             <button id="addKnowledgeBtn" class="mt-4 sm:mt-0 flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-3 px-5 rounded-lg shadow-sm hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                Adicionar Registro
-            </button>
-        </header>
-
-        <!-- Seção de KPIs -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Card 1: Média Geral -->
-            <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200 animate-fade-in flex flex-col h-full">
-                <div class="flex items-center gap-4">
-                    <div class="bg-indigo-100 p-3 rounded-full flex-shrink-0"><i data-lucide="bar-chart-big" class="text-indigo-600"></i></div>
-                    <p class="text-sm text-slate-500">Média Geral</p>
-                </div>
-                <div class="mt-auto pt-2">
-                    <p id="kpiAvgValue" class="text-xl sm:text-2xl font-bold text-slate-800">0.0</p>
-                </div>
-            </div>
-            <!-- Card 2: Tema mais Forte -->
-            <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200 animate-fade-in [animation-delay:100ms] flex flex-col h-full">
-                <div class="flex items-center gap-4">
-                    <div class="bg-emerald-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-up" class="text-emerald-600"></i></div>
-                    <p class="text-sm text-slate-500">Tema mais Forte</p>
-                </div>
-                <div class="mt-auto pt-2">
-                    <p id="kpiStrongestValue" class="text-base sm:text-lg font-bold text-slate-800 break-words">N/A</p>
-                </div>
-            </div>
-            <!-- Card 3: Ponto de Atenção -->
-            <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200 animate-fade-in [animation-delay:200ms] flex flex-col h-full">
-                <div class="flex items-center gap-4">
-                    <div class="bg-rose-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-down" class="text-rose-600"></i></div>
-                    <p class="text-sm text-slate-500">Ponto de Atenção</p>
-                </div>
-                <div class="mt-auto pt-2">
-                    <p id="kpiWeakestValue" class="text-base sm:text-lg font-bold text-slate-800 break-words">N/A</p>
-                </div>
-            </div>
-            <!-- Card 4: Colaboradores -->
-            <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200 animate-fade-in [animation-delay:300ms] flex flex-col h-full">
-                <div class="flex items-center gap-4">
-                    <div class="bg-sky-100 p-3 rounded-full flex-shrink-0"><i data-lucide="users" class="text-sky-600"></i></div>
-                    <p class="text-sm text-slate-500">Colaboradores</p>
-                </div>
-                <div class="mt-auto pt-2">
-                    <p id="kpiTotalValue" class="text-xl sm:text-2xl font-bold text-slate-800">0</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Abas de Navegação -->
-        <div class="mb-6 border-b border-slate-200">
-            <nav class="flex -mb-px" aria-label="Tabs">
-                <button class="tab active group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm" data-tab="overview">
-                    <i data-lucide="layout-dashboard"></i> Visão Geral
-                </button>
-                <button class="tab group inline-flex items-center gap-2 py-4 px-4 border-b-2 border-transparent hover:border-slate-300 hover:text-slate-600 font-medium text-sm text-slate-500" data-tab="matrix">
-                    <i data-lucide="grid-3x3"></i> Matriz de Competências
-                </button>
+            <nav class="flex-1 px-4 py-4 space-y-2">
+                <a href="#" class="sidebar-link active flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="biblioteca">
+                    <i data-lucide="library" class="w-5 h-5"></i> Biblioteca
+                </a>
+                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="mapa">
+                    <i data-lucide="map" class="w-5 h-5"></i> Mapa de Conhecimentos
+                </a>
+                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="monitoramento">
+                    <i data-lucide="activity" class="w-5 h-5"></i> Monitoramento
+                </a>
             </nav>
-        </div>
+            <div class="px-6 py-4 mt-auto">
+                <div class="p-4 bg-slate-100 rounded-lg text-center">
+                    <p class="text-sm font-semibold text-slate-700">Precisa de ajuda?</p>
+                    <p class="text-xs text-slate-500 mt-1">Contate o suporte para mais informações.</p>
+                </div>
+            </div>
+        </aside>
 
-        <!-- Conteúdo das Abas -->
-        <div id="tab-content-container">
-            <!-- Aba 1: Visão Geral -->
-            <div id="overview" class="tab-content animate-fade-in">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-                        <div class="p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                            <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="table"></i> Registros de Conhecimento</h2>
-                            <div class="relative w-full sm:w-64"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i><input id="searchInput" type="text" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></div>
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Header Fixo -->
+            <header class="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-slate-200 z-20">
+                <div class="mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-16">
+                        <!-- Botão Hamburguer (Mobile) -->
+                        <button id="menu-toggle" class="lg:hidden text-slate-600 hover:text-slate-800">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <!-- Pesquisa Global -->
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input id="globalSearchInput" type="text" placeholder="Buscar..." class="w-full sm:w-80 pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         </div>
-                        <div class="overflow-x-auto"><table class="responsive-table w-full text-sm text-left text-slate-500"><thead class="text-xs text-slate-700 uppercase bg-slate-50"><tr id="tableHeader"></tr></thead><tbody id="knowledgeTableBody" class="divide-y divide-slate-200 md:divide-y-0"></tbody></table><div id="noDataMessage" class="hidden text-center p-8 text-slate-500">Nenhum dado encontrado.</div></div>
-                    </div>
-                    <div class="lg:col-span-1 flex flex-col gap-8">
-                        <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200">
-                            <h2 class="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="filter"></i> Filtros e Visualização</h2>
-                            <div class="grid grid-cols-1 gap-4">
-                                <div><label for="collaboratorFilter" class="block mb-1 text-sm font-medium text-slate-600">Por Colaborador</label><select id="collaboratorFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div>
-                                <div><label for="topicFilter" class="block mb-1 text-sm font-medium text-slate-600">Por Tema</label><select id="topicFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div>
-                                <div><label for="chartTypeSelector" class="block mb-1 text-sm font-medium text-slate-600">Tipo de Gráfico</label><select id="chartTypeSelector" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"><option value="bar">Barras</option><option value="radar">Radar</option><option value="doughnut">Rosca</option></select></div>
-                                <hr class="my-2 border-slate-200">
-                                <div class="flex gap-3"><button id="exportCsvBtn" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i> CSV</button><button id="exportXlsxBtn" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i> Excel</button></div>
+                        <!-- Avatar do Usuário -->
+                        <div class="flex items-center gap-4">
+                             <div class="flex items-center gap-2 text-sm">
+                                <span class="font-semibold text-slate-700 hidden md:inline">Jhonatan</span>
+                                <img src="https://placehold.co/40x40/eef2ff/4338ca?text=J" alt="Avatar do usuário" class="w-10 h-10 rounded-full border-2 border-indigo-200">
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200"><h2 id="chartTitle" class="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="bar-chart-2"></i> Análise Visual</h2><div class="relative h-80"><canvas id="knowledgeChart"></canvas></div></div>
                     </div>
                 </div>
-            </div>
-            <!-- Aba 2: Matriz de Competências -->
-            <div id="matrix" class="tab-content hidden animate-fade-in">
-                <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-                    <div class="p-6">
-                        <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="grid-3x3"></i> Matriz de Competências</h2>
-                        <p class="text-sm text-slate-500 mt-1">Compare o nível de todos os colaboradores em cada tema. Células em vermelho indicam pontos críticos de atenção (nível baixo em temas de alta prioridade).</p>
+            </header>
+
+            <!-- Área de Conteúdo Dinâmico -->
+            <main class="flex-1 p-4 sm:p-6 lg:p-8">
+                <!-- VIEW 1: Biblioteca de Procedimentos (Default) -->
+                <div id="view-biblioteca" class="view-content">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">Biblioteca de Procedimentos</h2>
+                        <p class="text-slate-500 mt-1">Acesse treinamentos, guias e materiais de apoio.</p>
                     </div>
-                    <div id="matrixContainer" class="overflow-x-auto p-2"></div>
+                    <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Card de Procedimento -->
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="bg-indigo-100 p-3 rounded-lg"><i data-lucide="landmark" class="text-indigo-600"></i></div>
+                                <h3 class="font-semibold text-slate-800">Apuração Lucro Presumido</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">Guia completo sobre a apuração, cálculo de impostos e obrigações acessórias.</p>
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-semibold text-slate-600">Seu Progresso:</span>
+                                <span class="px-2 py-1 font-semibold text-emerald-800 bg-emerald-100 rounded-full">Concluído</span>
+                            </div>
+                        </div>
+                         <!-- Card de Procedimento -->
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="bg-sky-100 p-3 rounded-lg"><i data-lucide="file-text" class="text-sky-600"></i></div>
+                                <h3 class="font-semibold text-slate-800">SPED Fiscal</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">Entenda a estrutura do arquivo, validação e entrega desta obrigação acessória.</p>
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-semibold text-slate-600">Seu Progresso:</span>
+                                <span class="px-2 py-1 font-semibold text-amber-800 bg-amber-100 rounded-full">Em Andamento</span>
+                            </div>
+                        </div>
+                        <!-- Card de Procedimento -->
+                         <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="bg-rose-100 p-3 rounded-lg"><i data-lucide="users" class="text-rose-600"></i></div>
+                                <h3 class="font-semibold text-slate-800">Folha de Pagamento</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">Processos de admissão, cálculo de folha, férias, 13º e rescisão contratual.</p>
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-semibold text-slate-600">Seu Progresso:</span>
+                                <span class="px-2 py-1 font-semibold text-slate-800 bg-slate-200 rounded-full">Não Iniciado</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <!-- VIEW 2: Mapa de Conhecimentos -->
+                <div id="view-mapa" class="view-content hidden">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Mapa de Conhecimentos da Equipe</h2>
+                            <p class="text-slate-500 mt-1">Visualize e compare o nível de domínio da sua equipe.</p>
+                        </div>
+                        <button id="addKnowledgeBtn" class="flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700 transition duration-300 ease-in-out">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                            Adicionar Registro
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+                         <!-- Filtros -->
+                        <div class="lg:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="filter" class="w-5 h-5"></i> Filtros e Ações</h3>
+                            <div class="space-y-4">
+                                <div><label for="collaboratorFilter" class="block mb-1 text-sm font-medium text-slate-600">Colaborador</label><select id="collaboratorFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div>
+                                <div><label for="topicFilter" class="block mb-1 text-sm font-medium text-slate-600">Tema</label><select id="topicFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div>
+                                <div><label for="chartTypeSelector" class="block mb-1 text-sm font-medium text-slate-600">Gráfico</label><select id="chartTypeSelector" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"><option value="bar">Barras</option><option value="radar">Radar</option><option value="doughnut">Rosca</option></select></div>
+                                <hr class="my-2 border-slate-200">
+                                <div class="flex gap-3"><button id="exportCsvBtn" title="Exportar para CSV" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i></button><button id="exportXlsxBtn" title="Exportar para Excel" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i></button></div>
+                            </div>
+                        </div>
+                        <!-- KPIs -->
+                        <div class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-indigo-100 p-3 rounded-full flex-shrink-0"><i data-lucide="bar-chart-big" class="text-indigo-600"></i></div><p class="text-sm text-slate-500">Média Geral</p></div><div class="mt-auto pt-4"><p id="kpiAvgValue" class="text-2xl font-bold text-slate-800">0.0</p></div></div>
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-emerald-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-up" class="text-emerald-600"></i></div><p class="text-sm text-slate-500">Tema mais Forte</p></div><div class="mt-auto pt-4"><p id="kpiStrongestValue" class="text-lg font-bold text-slate-800 break-words">N/A</p></div></div>
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-rose-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-down" class="text-rose-600"></i></div><p class="text-sm text-slate-500">Ponto de Atenção</p></div><div class="mt-auto pt-4"><p id="kpiWeakestValue" class="text-lg font-bold text-slate-800 break-words">N/A</p></div></div>
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-sky-100 p-3 rounded-full flex-shrink-0"><i data-lucide="users" class="text-sky-600"></i></div><p class="text-sm text-slate-500">Colaboradores</p></div><div class="mt-auto pt-4"><p id="kpiTotalValue" class="text-2xl font-bold text-slate-800">0</p></div></div>
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6"><div class="overflow-x-auto"><table class="responsive-map-table w-full text-sm text-left text-slate-500"><thead class="text-xs text-slate-700 uppercase bg-slate-50"></thead><tbody id="knowledgeTableBody" class="divide-y divide-slate-200 md:divide-y-0"></tbody></table></div></div>
+                        <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 id="chartTitle" class="font-semibold text-slate-800 mb-4">Análise Visual</h3><div class="h-80"><canvas id="knowledgeChart"></canvas></div></div>
+                     </div>
+                </div>
+
+                <!-- VIEW 3: Monitoramento de Engajamento -->
+                <div id="view-monitoramento" class="view-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">Monitoramento de Engajamento</h2>
+                        <p class="text-slate-500 mt-1">Acompanhe a evolução e participação da equipe.</p>
+                    </div>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Tempo total assistido</p><p class="text-3xl font-bold text-slate-800">128 <span class="text-lg font-medium text-slate-500">horas</span></p></div>
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Treinamentos Concluídos</p><p class="text-3xl font-bold text-slate-800">32</p></div>
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Colaborador mais ativo</p><p class="text-xl font-bold text-slate-800">Maria (Contadora)</p></div>
+                     </div>
+                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <h3 class="font-semibold text-slate-800 mb-4">Evolução de Engajamento (Últimos 30 dias)</h3>
+                            <div class="h-80"><canvas id="engagementChart"></canvas></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <h3 class="font-semibold text-slate-800 mb-4">Registro de Interações</h3>
+                            <div class="overflow-y-auto h-80">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-slate-500 uppercase sticky top-0 bg-white">
+                                        <tr><th class="py-2">De</th><th class="py-2">Para</th><th class="py-2">Assunto</th></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <tr><td class="py-3"><div class="font-medium text-slate-800">João</div><div class="text-xs text-slate-500">Estagiário</div></td><td class="py-3"><div class="font-medium text-slate-800">Jhonatan</div><div class="text-xs text-slate-500">Analista Fiscal</div></td><td class="py-3"><div class="text-slate-600">Dúvida sobre SPED</div><div class="text-xs text-slate-400">03/09/2025</div></td></tr>
+                                        <tr><td class="py-3"><div class="font-medium text-slate-800">Ana</div><div class="text-xs text-slate-500">Estagiária</div></td><td class="py-3"><div class="font-medium text-slate-800">Ryan</div><div class="text-xs text-slate-500">Analista Fiscal</div></td><td class="py-3"><div class="text-slate-600">Retenções Federais</div><div class="text-xs text-slate-400">02/09/2025</div></td></tr>
+                                        <tr><td class="py-3"><div class="font-medium text-slate-800">Carlos</div><div class="text-xs text-slate-500">Analista Fiscal</div></td><td class="py-3"><div class="font-medium text-slate-800">Laura</div><div class="text-xs text-slate-500">Gerente Contábil</div></td><td class="py-3"><div class="text-slate-600">Planejamento Tribut.</div><div class="text-xs text-slate-400">01/09/2025</div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Modal (mesmo para ambas as abas) -->
-    <div id="knowledgeModal" class="modal-backdrop fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0">
-        <div class="modal-content bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl transform scale-95 opacity-0">
+    <!-- Modal de Adicionar Conhecimento -->
+    <div id="knowledgeModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300 z-50">
+        <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl transition-transform duration-300 transform scale-95">
             <form id="knowledgeForm">
                 <input type="hidden" id="editId">
-                <h2 id="modalTitle" class="text-2xl font-bold mb-6 text-slate-900">Adicionar Novo Registro</h2>
+                <h2 id="modalTitle" class="text-2xl font-bold mb-6 text-slate-900">Adicionar Registro</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="mb-4">
-                        <label for="name" class="block mb-2 text-sm font-medium text-slate-700">Colaborador</label>
-                        <input type="text" id="name" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="role" class="block mb-2 text-sm font-medium text-slate-700">Cargo</label>
-                        <input type="text" id="role" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required>
-                    </div>
-                    <div class="mb-4 md:col-span-2">
-                        <label for="topic" class="block mb-2 text-sm font-medium text-slate-700">Tema de Conhecimento</label>
-                        <input type="text" id="topic" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="priority" class="block mb-2 text-sm font-medium text-slate-700">Prioridade</label>
-                        <select id="priority" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition">
-                            <option>Baixa</option>
-                            <option selected>Média</option>
-                            <option>Alta</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label for="evaluationDate" class="block mb-2 text-sm font-medium text-slate-700">Data da Avaliação</label>
-                        <input type="date" id="evaluationDate" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required>
-                    </div>
+                    <div class="mb-4"><label for="name" class="block mb-2 text-sm font-medium text-slate-700">Colaborador</label><input type="text" id="name" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
+                    <div class="mb-4"><label for="role" class="block mb-2 text-sm font-medium text-slate-700">Cargo</label><input type="text" id="role" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
+                    <div class="mb-4 md:col-span-2"><label for="topic" class="block mb-2 text-sm font-medium text-slate-700">Tema</label><input type="text" id="topic" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
+                    <div class="mb-4"><label for="priority" class="block mb-2 text-sm font-medium text-slate-700">Prioridade</label><select id="priority" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required><option value="Alta">Alta</option><option value="Média">Média</option><option value="Baixa">Baixa</option></select></div>
+                    <div class="mb-4"><label for="evaluationDate" class="block mb-2 text-sm font-medium text-slate-700">Avaliação</label><input type="date" id="evaluationDate" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
+                    <div class="mb-6 md:col-span-2"><label for="level" class="block mb-2 text-sm font-medium text-slate-700">Nível (<span id="levelValue" class="font-bold text-indigo-600">5</span>)</label><input type="range" id="level" min="0" max="10" value="5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"></div>
                 </div>
-                <div class="mb-6">
-                    <label for="level" class="block mb-2 text-sm font-medium text-slate-700">Nível</label>
-                    <input type="range" id="level" min="0" max="10" value="5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-                    <div class="text-center mt-2 font-semibold text-indigo-600 text-lg" id="levelValue">5</div>
-                </div>
-                <div class="flex justify-end gap-4">
-                    <button type="button" id="cancelBtn" class="py-2 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400">Cancelar</button>
-                    <button type="submit" id="saveBtn" class="py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Salvar Registro</button>
+                <div class="flex justify-end gap-4 mt-2">
+                    <button type="button" id="cancelBtn" class="py-2 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition">Cancelar</button>
+                    <button type="submit" id="saveBtn" class="py-2.5 px-5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Notificação Toast -->
+    <div id="toast-notification" class="bg-slate-800 text-white py-3 px-5 rounded-lg shadow-xl">
+        <p id="toast-message"></p>
+    </div>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- DADOS INICIAIS ---
-            let knowledgeData = [
-                { id: 1, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 10, priority: 'Alta', evaluationDate: '2025-08-20' },
-                { id: 2, name: 'Ryan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 9, priority: 'Alta', evaluationDate: '2025-08-20' },
-                { id: 3, name: 'João', role: 'Estagiário', topic: 'Apuração Lucro Presumido', level: 2, priority: 'Média', evaluationDate: '2025-08-15' },
-                { id: 4, name: 'Maria', role: 'Contadora Sênior', topic: 'Apuração Lucro Real', level: 9, priority: 'Alta', evaluationDate: '2025-09-01' },
-                { id: 5, name: 'Carlos', role: 'Analista Fiscal', topic: 'Apuração Lucro Real', level: 6, priority: 'Alta', evaluationDate: '2025-07-30' },
-                { id: 6, name: 'Ana', role: 'Estagiária', topic: 'Retenções Federais', level: 4, priority: 'Média', evaluationDate: '2025-09-02' },
-                { id: 7, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Retenções Federais', level: 8, priority: 'Média', evaluationDate: '2025-08-25' },
-                { id: 8, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Apuração Lucro Real', level: 7, priority: 'Alta', evaluationDate: '2025-08-25' },
-                { id: 9, name: 'Maria', role: 'Contadora Sênior', topic: 'Planejamento Tributário', level: 8, priority: 'Alta', evaluationDate: '2025-09-01' },
-                { id: 10, name: 'Carlos', role: 'Analista Fiscal', topic: 'Retenções Federais', level: 5, priority: 'Média', evaluationDate: '2025-07-30' },
-            ];
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- LÓGICA DE NAVEGAÇÃO PRINCIPAL ---
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const views = document.querySelectorAll('.view-content');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
 
-            // --- ESTADO DA APLICAÇÃO ---
-            let chartInstance = null;
-            let currentSort = { key: 'name', order: 'asc' };
+        let isMapInitialized = false;
+        let isMonitoringInitialized = false;
 
-            // --- FUNÇÕES DE RENDERIZAÇÃO E UTILITÁRIOS ---
-            const getLevelTag = (level) => {
-                if (level >= 9) return `<span class="px-2 py-1 text-xs font-semibold text-emerald-800 bg-emerald-100 rounded-full">Especialista</span>`;
-                if (level >= 7) return `<span class="px-2 py-1 text-xs font-semibold text-sky-800 bg-sky-100 rounded-full">Avançado</span>`;
-                if (level >= 4) return `<span class="px-2 py-1 text-xs font-semibold text-amber-800 bg-amber-100 rounded-full">Intermediário</span>`;
-                if (level >= 1) return `<span class="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-full">Básico</span>`;
-                return `<span class="px-2 py-1 text-xs font-semibold text-rose-800 bg-rose-100 rounded-full">Iniciante</span>`;
-            };
+        const switchView = (viewId) => {
+            views.forEach(view => view.classList.add('hidden'));
+            const activeView = document.getElementById(`view-${viewId}`);
+            if (activeView) activeView.classList.remove('hidden');
+            
+            sidebarLinks.forEach(link => link.classList.toggle('active', link.dataset.view === viewId));
+            
+            if (window.innerWidth < 1024) sidebar.classList.add('-translate-x-full');
 
-            const getPriorityTag = (priority) => {
-                if (priority === 'Alta') return `<span class="px-2 py-1 text-xs font-semibold text-rose-800 bg-rose-100 rounded-full">Alta</span>`;
-                if (priority === 'Média') return `<span class="px-2 py-1 text-xs font-semibold text-amber-800 bg-amber-100 rounded-full">Média</span>`;
-                return `<span class="px-2 py-1 text-xs font-semibold text-slate-800 bg-slate-100 rounded-full">Baixa</span>`;
+            if (viewId === 'mapa' && !isMapInitialized) {
+                initMapFunctions();
+                isMapInitialized = true;
+            } else if (viewId === 'monitoramento' && !isMonitoringInitialized) {
+                setupEngagementChart();
+                isMonitoringInitialized = true;
             }
+        };
 
-            const formatDate = (dateString) => {
-                const [year, month, day] = dateString.split('-');
-                return `${day}/${month}/${year}`;
-            };
+        sidebarLinks.forEach(link => link.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView(e.currentTarget.dataset.view);
+        }));
 
-            const updateKpiCards = () => {
-                const totalLevels = knowledgeData.reduce((acc, item) => acc + item.level, 0);
-                document.getElementById('kpiAvgValue').textContent = knowledgeData.length > 0 ? (totalLevels / knowledgeData.length).toFixed(1) : '0.0';
-                document.getElementById('kpiTotalValue').textContent = [...new Set(knowledgeData.map(item => item.name))].length;
+        menuToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
 
-                if (knowledgeData.length > 0) {
-                    const topicLevels = knowledgeData.reduce((acc, { topic, level }) => {
-                        if (!acc[topic]) acc[topic] = { total: 0, count: 0 };
-                        acc[topic].total += level;
-                        acc[topic].count++;
-                        return acc;
-                    }, {});
-                    const topicAvgs = Object.entries(topicLevels).map(([topic, data]) => ({ topic, avg: data.total / data.count }));
-                    const strongest = topicAvgs.reduce((max, topic) => topic.avg > max.avg ? topic : max);
-                    document.getElementById('kpiStrongestValue').textContent = strongest.topic;
-                    const weakest = topicAvgs.reduce((min, topic) => topic.avg < min.avg ? topic : min);
-                    document.getElementById('kpiWeakestValue').textContent = weakest.topic;
-                } else {
-                     document.getElementById('kpiStrongestValue').textContent = 'N/A';
-                     document.getElementById('kpiWeakestValue').textContent = 'N/A';
-                }
-            };
+        // --- LÓGICA ESPECÍFICA DO MAPA DE CONHECIMENTOS ---
+        let knowledgeData = [
+            { id: 1, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 10, priority: 'Alta', evaluationDate: '2025-08-20' },
+            { id: 2, name: 'Ryan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 9, priority: 'Alta', evaluationDate: '2025-08-20' },
+            { id: 3, name: 'João', role: 'Estagiário', topic: 'Apuração Lucro Presumido', level: 2, priority: 'Média', evaluationDate: '2025-08-15' },
+            { id: 4, name: 'Maria', role: 'Contadora Sênior', topic: 'SPED Fiscal', level: 9, priority: 'Alta', evaluationDate: '2025-08-18' },
+            { id: 5, name: 'Carlos', role: 'Analista Fiscal', topic: 'SPED Fiscal', level: 6, priority: 'Alta', evaluationDate: '2025-08-18' },
+            { id: 6, name: 'Ana', role: 'Estagiária', topic: 'Folha de Pagamento', level: 4, priority: 'Média', evaluationDate: '2025-08-19' },
+            { id: 7, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Folha de Pagamento', level: 7, priority: 'Baixa', evaluationDate: '2025-08-20' },
+            { id: 8, name: 'Laura', role: 'Gerente Contábil', topic: 'Planejamento Tributário', level: 10, priority: 'Alta', evaluationDate: '2025-08-21' },
+            { id: 9, name: 'Pedro', role: 'Analista Contábil', topic: 'Planejamento Tributário', level: 7, priority: 'Alta', evaluationDate: '2025-08-21' },
+            { id: 10, name: 'Ryan', role: 'Analista Fiscal', topic: 'Retenções Federais', level: 5, priority: 'Média', evaluationDate: '2025-08-17' },
+        ];
+        
+        let knowledgeChart = null;
+        let currentFilters = { collaborator: 'all', topic: 'all', chartType: 'bar' };
+        
+        const getLevelTag = (level) => {
+            const levelValue = parseInt(level, 10);
+            let color = 'bg-slate-100 text-slate-700'; let text = 'Iniciante';
+            if (levelValue >= 4) { color = 'bg-sky-100 text-sky-700'; text = 'Básico'; }
+            if (levelValue >= 6) { color = 'bg-amber-100 text-amber-700'; text = 'Intermediário'; }
+            if (levelValue >= 8) { color = 'bg-emerald-100 text-emerald-700'; text = 'Avançado'; }
+            if (levelValue === 10) { color = 'bg-indigo-100 text-indigo-700'; text = 'Especialista'; }
+            return `<div class="flex items-center gap-2 justify-end md:justify-start"><span class="px-2 py-1 text-xs font-semibold rounded-full ${color}">${text}</span><span class="font-bold text-sm text-slate-600 w-6 text-center">${levelValue}</span></div>`;
+        };
+        const getPriorityTag = (priority) => {
+            const colors = { 'Alta': 'bg-rose-100 text-rose-700', 'Média': 'bg-amber-100 text-amber-700', 'Baixa': 'bg-sky-100 text-sky-700' };
+            return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${colors[priority] || ''}">${priority}</span>`;
+        };
+        const formatDate = (dateString) => new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR');
 
-            const populateFilters = () => {
-                const topics = ['', ...[...new Set(knowledgeData.map(item => item.topic))].sort()];
-                document.getElementById('topicFilter').innerHTML = topics.map(t => `<option value="${t}">${t || 'Todos os Temas'}</option>`).join('');
+        const renderTable = (data) => {
+            const tableBody = document.getElementById('knowledgeTableBody');
+            const tableHead = tableBody.previousElementSibling;
+            tableHead.innerHTML = `<tr><th class="px-6 py-3">Colaborador</th><th class="px-6 py-3">Tema</th><th class="px-6 py-3">Nível</th><th class="px-6 py-3">Ações</th></tr>`;
+            tableBody.innerHTML = !data.length ? `<tr><td colspan="4" class="text-center p-8 text-slate-500">Nenhum registro encontrado.</td></tr>` : '';
 
-                const collaborators = ['', ...[...new Set(knowledgeData.map(item => item.name))].sort()];
-                document.getElementById('collaboratorFilter').innerHTML = collaborators.map(c => `<option value="${c}">${c || 'Todos os Colaboradores'}</option>`).join('');
-            };
-            
-            const renderTableHeader = () => {
-                const headers = [
-                    { key: 'name', label: 'Colaborador' }, { key: 'topic', label: 'Tema' },
-                    { key: 'level', label: 'Nível' }, { key: 'priority', label: 'Prioridade' },
-                    { key: 'evaluationDate', label: 'Avaliação' }, { key: 'actions', label: 'Ações', sortable: false }
-                ];
-                let headerHTML = '';
-                headers.forEach(h => {
-                    let sortIcon = '';
-                    if (h.key === currentSort.key) {
-                        sortIcon = currentSort.order === 'asc' ? '<i data-lucide="arrow-up" class="w-4 h-4 ml-1"></i>' : '<i data-lucide="arrow-down" class="w-4 h-4 ml-1"></i>';
-                    }
-                    headerHTML += `<th scope="col" class="px-6 py-3 ${h.sortable !== false ? 'sortable' : ''}" data-key="${h.key}">${h.label}${sortIcon}</th>`;
-                });
-                document.getElementById('tableHeader').innerHTML = headerHTML;
-                lucide.createIcons();
-            };
-
-            const renderTable = (data) => {
-                const tableBody = document.getElementById('knowledgeTableBody');
-                tableBody.innerHTML = '';
-                document.getElementById('noDataMessage').classList.toggle('hidden', data.length > 0);
-
-                data.forEach(item => {
-                    const row = document.createElement('tr');
-                    // No mobile, a classe `responsive-table` cuida do layout dos `tr` e `td`
-                    row.innerHTML = `
-                        <td class="px-6 py-4" data-label="Colaborador">
-                            <div class="text-right md:text-left">
-                                <div class="flex items-center justify-end md:justify-start gap-2">
-                                    <span class="font-medium text-slate-900">${item.name}</span>
-                                    <button class="p-1 text-sky-600 hover:text-sky-800 transition send-btn flex-shrink-0" data-name="${item.name}" title="Enviar para ${item.name}">
-                                        <i data-lucide="send" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
-                                <div class="text-xs text-slate-500">${item.role}</div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4" data-label="Tema">${item.topic}</td>
-                        <td class="px-6 py-4" data-label="Nível">${getLevelTag(item.level)}</td>
-                        <td class="px-6 py-4" data-label="Prioridade">${getPriorityTag(item.priority)}</td>
-                        <td class="px-6 py-4" data-label="Avaliação">${formatDate(item.evaluationDate)}</td>
-                        <td class="px-6 py-4" data-label="Ações"><div class="flex gap-3 justify-end md:justify-center"><button class="p-1 text-indigo-600 hover:text-indigo-800 transition edit-btn" data-id="${item.id}" title="Editar"><i data-lucide="edit-3" class="w-5 h-5"></i></button><button class="p-1 text-rose-600 hover:text-rose-800 transition delete-btn" data-id="${item.id}" title="Excluir"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div></td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-                lucide.createIcons();
-            };
-            
-            const renderMatrix = () => {
-                const container = document.getElementById('matrixContainer');
-                const collaborators = [...new Set(knowledgeData.map(item => item.name))].sort();
-                const topics = [...new Set(knowledgeData.map(item => item.topic))].sort();
-                
-                let table = '<table class="min-w-full text-sm text-center border-collapse">';
-                // Header
-                table += '<thead class="bg-slate-50"><tr><th class="sticky left-0 bg-slate-50 z-10 p-2 border border-slate-200">Colaborador / Tema</th>';
-                topics.forEach(topic => table += `<th class="p-2 border border-slate-200 min-w-[150px]">${topic}</th>`);
-                table += '</tr></thead><tbody>';
-                
-                // Body
-                collaborators.forEach(name => {
-                    table += `<tr class="hover:bg-slate-50"><td class="sticky left-0 bg-white hover:bg-slate-50 z-10 font-medium text-slate-800 p-2 border border-slate-200 text-left">${name}</td>`;
-                    topics.forEach(topic => {
-                        const entry = knowledgeData.find(d => d.name === name && d.topic === topic);
-                        if (entry) {
-                            const isCritical = entry.priority === 'Alta' && entry.level < 4;
-                            table += `<td class="border border-slate-200 ${isCritical ? 'bg-rose-100' : 'bg-white'}"><div class="p-2 font-bold text-lg ${entry.level > 7 ? 'text-emerald-600' : entry.level > 4 ? 'text-sky-600' : 'text-rose-600'}">${entry.level}</div></td>`;
-                        } else {
-                            table += '<td class="border border-slate-200 bg-slate-50 text-slate-400">-</td>';
-                        }
-                    });
-                    table += '</tr>';
-                });
-                
-                table += '</tbody></table>';
-                container.innerHTML = table;
-            };
-
-            const updateChart = (data) => {
-                if (chartInstance) chartInstance.destroy();
-                const chartCanvas = document.getElementById('knowledgeChart').getContext('2d');
-                const selCollab = document.getElementById('collaboratorFilter').value;
-                const selTopic = document.getElementById('topicFilter').value;
-                const chartType = document.getElementById('chartTypeSelector').value;
-                let chartConfig;
-
-                if (selCollab) {
-                    const collabData = knowledgeData.filter(d => d.name === selCollab);
-                    chartConfig = { type: 'radar', data: { labels: collabData.map(d=>d.topic), datasets: [{ label: 'Nível', data: collabData.map(d=>d.level), backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: 'rgba(79, 70, 229, 1)', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { suggestedMin: 0, suggestedMax: 10 } } } };
-                } else {
-                    const topicData = selTopic ? knowledgeData.filter(d=>d.topic === selTopic) : data;
-                    const labels = selTopic ? topicData.map(d=>d.name) : [...new Set(data.map(d=>d.topic))];
-                    const levels = selTopic ? topicData.map(d=>d.level) : labels.map(label => {
-                        const items = data.filter(d=>d.topic === label);
-                        return items.reduce((acc, i) => acc + i.level, 0) / items.length;
-                    });
-                    chartConfig = { type: chartType, data: { labels, datasets: [{ label: `Nível em ${selTopic || 'Geral'}`, data: levels, backgroundColor: levels.map(l => l >= 8 ? 'rgba(5, 150, 105, 0.7)' : l >= 5 ? 'rgba(245, 158, 11, 0.7)' : 'rgba(225, 29, 72, 0.7)') }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: chartType !== 'bar' } } } };
-                    if (chartType === 'bar') chartConfig.options.scales = { y: { beginAtZero: true, max: 10 } };
-                }
-                
-                if (data.length > 0) chartInstance = new Chart(chartCanvas, chartConfig);
-            };
-            
-            const updateDashboard = () => {
-                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-                const selCollab = document.getElementById('collaboratorFilter').value;
-                const selTopic = document.getElementById('topicFilter').value;
-
-                let filteredData = knowledgeData.filter(d => {
-                    return (selCollab ? d.name === selCollab : true) &&
-                           (selTopic ? d.topic === selTopic : true) &&
-                           (d.name.toLowerCase().includes(searchTerm) || d.topic.toLowerCase().includes(searchTerm) || d.role.toLowerCase().includes(searchTerm));
-                });
-                
-                // Sort
-                filteredData.sort((a, b) => {
-                    if (a[currentSort.key] < b[currentSort.key]) return currentSort.order === 'asc' ? -1 : 1;
-                    if (a[currentSort.key] > b[currentSort.key]) return currentSort.order === 'asc' ? 1 : -1;
-                    return 0;
-                });
-
-                renderTable(filteredData);
-                updateChart(filteredData);
-                updateKpiCards(); // Full dataset
-                renderMatrix(); // Full dataset
-            };
-            
-            // --- MODAL E MANIPULAÇÃO DE DADOS ---
-            const openModal = (id = null) => {
-                const form = document.getElementById('knowledgeForm');
-                form.reset();
-                document.getElementById('evaluationDate').value = new Date().toISOString().slice(0, 10);
-                document.getElementById('editId').value = '';
-                document.getElementById('levelValue').textContent = '5';
-                
-                if (id) {
-                    const item = knowledgeData.find(d => d.id === id);
-                    if (item) {
-                        form.querySelector('#modalTitle').textContent = 'Editar Registro';
-                        Object.keys(item).forEach(key => { if(form.elements[key]) form.elements[key].value = item[key]; });
-                        document.getElementById('levelValue').textContent = item.level;
-                    }
-                } else {
-                    form.querySelector('#modalTitle').textContent = 'Adicionar Novo Registro';
-                }
-                
-                const modal = document.getElementById('knowledgeModal');
-                modal.classList.remove('hidden');
-                setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0'); }, 10);
-            };
-
-            const closeModal = () => {
-                const modal = document.getElementById('knowledgeModal');
-                modal.classList.add('opacity-0');
-                modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            };
-
-            document.getElementById('knowledgeForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const form = e.target;
-                const id = parseInt(form.elements['editId'].value);
-                const formData = {
-                    name: form.elements['name'].value.trim(), role: form.elements['role'].value.trim(),
-                    topic: form.elements['topic'].value.trim(), level: parseInt(form.elements['level'].value),
-                    priority: form.elements['priority'].value, evaluationDate: form.elements['evaluationDate'].value,
-                };
-
-                if (id) {
-                    knowledgeData = knowledgeData.map(item => item.id === id ? { ...item, ...formData } : item);
-                } else {
-                    formData.id = knowledgeData.length > 0 ? Math.max(...knowledgeData.map(d => d.id)) + 1 : 1;
-                    knowledgeData.push(formData);
-                }
-                closeModal();
-                populateFilters();
-                updateDashboard();
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4" data-label="Colaborador">
+                        <div class="flex items-center gap-2">
+                            <div class="font-medium text-slate-900">${item.name}</div>
+                            <button class="send-btn text-slate-400 hover:text-indigo-600 transition" title="Enviar para ${item.name}" data-name="${item.name}"><i data-lucide="send" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="text-xs text-slate-500">${item.role}</div>
+                    </td>
+                    <td class="px-6 py-4" data-label="Tema">${item.topic}</td>
+                    <td class="px-6 py-4" data-label="Nível">${getLevelTag(item.level)}</td>
+                    <td class="px-6 py-4" data-label="Ações">
+                        <div class="flex gap-3 justify-end md:justify-start">
+                            <button class="edit-btn p-1 text-indigo-600 hover:text-indigo-800 transition" data-id="${item.id}" title="Editar"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
+                            <button class="delete-btn p-1 text-rose-600 hover:text-rose-800 transition" data-id="${item.id}" title="Excluir"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        </div>
+                    </td>`;
+                tableBody.appendChild(row);
             });
-            
-            const deleteData = (id) => {
-                if(confirm('Tem certeza que deseja excluir este registro? A ação não pode ser desfeita.')) {
-                    knowledgeData = knowledgeData.filter(item => item.id !== id);
-                    populateFilters();
-                    updateDashboard();
-                }
+            lucide.createIcons();
+        };
+
+        const updateKpiCards = (data) => {
+            document.getElementById('kpiAvgValue').textContent = data.length ? (data.reduce((sum, item) => sum + item.level, 0) / data.length).toFixed(1) : '0.0';
+            document.getElementById('kpiTotalValue').textContent = [...new Set(data.map(item => item.name))].length;
+            if (data.length) {
+                const topics = data.reduce((acc, item) => {
+                    if (!acc[item.topic]) acc[item.topic] = { sum: 0, count: 0 };
+                    acc[item.topic].sum += item.level; acc[item.topic].count++;
+                    return acc;
+                }, {});
+                let strongest = { topic: 'N/A', avg: -1 }; let weakest = { topic: 'N/A', avg: 11 };
+                Object.entries(topics).forEach(([topic, { sum, count }]) => {
+                    const avg = sum / count;
+                    if (avg > strongest.avg) strongest = { topic, avg };
+                    if (avg < weakest.avg) weakest = { topic, avg };
+                });
+                document.getElementById('kpiStrongestValue').textContent = strongest.topic;
+                document.getElementById('kpiWeakestValue').textContent = weakest.topic;
+            } else {
+                document.getElementById('kpiStrongestValue').textContent = 'N/A';
+                document.getElementById('kpiWeakestValue').textContent = 'N/A';
+            }
+        };
+
+        const updateChart = (data, type) => {
+            const chartCanvas = document.getElementById('knowledgeChart');
+            if (knowledgeChart) knowledgeChart.destroy();
+            if (!chartCanvas || !data.length) return;
+
+            const isCollaboratorView = currentFilters.collaborator !== 'all';
+            const labels = isCollaboratorView ? data.map(item => item.topic) : data.map(item => item.name);
+            const title = isCollaboratorView ? `Desempenho de ${currentFilters.collaborator}` : `Comparativo por ${currentFilters.topic === 'all' ? 'Conhecimento' : 'Colaborador'}`;
+            document.getElementById('chartTitle').textContent = title;
+
+            const chartData = {
+                labels,
+                datasets: [{
+                    label: 'Nível', data: data.map(item => item.level),
+                    backgroundColor: 'rgba(79, 70, 229, 0.7)', borderColor: 'rgba(79, 70, 229, 1)',
+                    borderWidth: 1, pointBackgroundColor: 'rgba(79, 70, 229, 1)'
+                }]
             };
 
-            // --- EVENT LISTENERS ---
-            document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                document.getElementById(e.currentTarget.dataset.tab).classList.remove('hidden');
-            }));
+            knowledgeChart = new Chart(chartCanvas.getContext('2d'), {
+                type, data: chartData,
+                options: { responsive: true, maintainAspectRatio: false, scales: type !== 'radar' ? { y: { beginAtZero: true, max: 10 } } : { r: { beginAtZero: true, max: 10 } }, plugins: { legend: { display: false } } }
+            });
+        };
+        
+        const populateFilters = () => {
+            const collaboratorFilter = document.getElementById('collaboratorFilter');
+            const topicFilter = document.getElementById('topicFilter');
+            const collaborators = ['Todos', ...new Set(knowledgeData.map(item => item.name))];
+            const topics = ['Todos', ...new Set(knowledgeData.map(item => item.topic))];
+            collaboratorFilter.innerHTML = collaborators.map(c => `<option value="${c === 'Todos' ? 'all' : c}">${c}</option>`).join('');
+            topicFilter.innerHTML = topics.map(t => `<option value="${t === 'Todos' ? 'all' : t}">${t}</option>`).join('');
+        };
 
-            document.getElementById('searchInput').addEventListener('input', updateDashboard);
-            document.getElementById('addKnowledgeBtn').addEventListener('click', () => openModal());
-            document.getElementById('cancelBtn').addEventListener('click', closeModal);
-            document.getElementById('level').addEventListener('input', (e) => document.getElementById('levelValue').textContent = e.target.value);
-            document.getElementById('tableHeader').addEventListener('click', (e) => {
-                const key = e.target.closest('.sortable')?.dataset.key;
-                if (!key) return;
-                const order = (currentSort.key === key && currentSort.order === 'asc') ? 'desc' : 'asc';
-                currentSort = { key, order };
-                renderTableHeader();
-                updateDashboard();
+        const applyFiltersAndRender = () => {
+            let filteredData = [...knowledgeData];
+            if (currentFilters.collaborator !== 'all') {
+                filteredData = filteredData.filter(item => item.name === currentFilters.collaborator);
+            }
+            if (currentFilters.topic !== 'all') {
+                filteredData = filteredData.filter(item => item.topic === currentFilters.topic);
+            }
+            renderTable(filteredData);
+            updateKpiCards(filteredData);
+            updateChart(filteredData, currentFilters.chartType);
+        };
+
+        const showToast = (message) => {
+            const toast = document.getElementById('toast-notification');
+            const msgEl = document.getElementById('toast-message');
+            msgEl.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        const initMapFunctions = () => {
+            populateFilters();
+            applyFiltersAndRender();
+
+            document.getElementById('collaboratorFilter').addEventListener('change', (e) => {
+                currentFilters.collaborator = e.target.value;
+                if (currentFilters.collaborator !== 'all') {
+                   document.getElementById('chartTypeSelector').value = 'radar';
+                   currentFilters.chartType = 'radar';
+                }
+                applyFiltersAndRender();
+            });
+            document.getElementById('topicFilter').addEventListener('change', (e) => {
+                currentFilters.topic = e.target.value;
+                applyFiltersAndRender();
+            });
+            document.getElementById('chartTypeSelector').addEventListener('change', (e) => {
+                currentFilters.chartType = e.target.value;
+                applyFiltersAndRender();
             });
             document.getElementById('knowledgeTableBody').addEventListener('click', (e) => {
-                const editBtn = e.target.closest('.edit-btn');
-                if (editBtn) openModal(parseInt(editBtn.dataset.id));
-                const deleteBtn = e.target.closest('.delete-btn');
-                if (deleteBtn) deleteData(parseInt(deleteBtn.dataset.id));
-
-                // Ação para o novo botão de enviar
                 const sendBtn = e.target.closest('.send-btn');
-                if (sendBtn) {
-                    const collaboratorName = sendBtn.dataset.name;
-                    
-                    // Simula o envio e exibe uma notificação toast
-                    const toast = document.createElement('div');
-                    toast.className = 'fixed bottom-5 right-5 bg-slate-900 text-white py-3 px-5 rounded-lg shadow-xl animate-fade-in z-50';
-                    toast.innerHTML = `<div class="flex items-center gap-3"><i data-lucide="check-circle" class="text-emerald-500"></i><p>Notificação para <strong>${collaboratorName}</strong> simulada.</p></div>`;
-                    document.body.appendChild(toast);
-                    lucide.createIcons(); // Renderiza o ícone no toast
-                    
-                    setTimeout(() => {
-                        toast.style.transition = 'opacity 0.5s ease';
-                        toast.style.opacity = '0';
-                        setTimeout(() => toast.remove(), 500);
-                    }, 3000);
-                }
+                if (sendBtn) showToast(`Mensagem enviada para ${sendBtn.dataset.name}!`);
             });
-            
-            [document.getElementById('topicFilter'), document.getElementById('collaboratorFilter'), document.getElementById('chartTypeSelector')].forEach(el => el.addEventListener('change', updateDashboard));
-            
-            const exportData = (format) => {
-                const dataToExport = knowledgeData.map(({id, ...rest}) => ({'Nome': rest.name, 'Cargo': rest.role, 'Tema': rest.topic, 'Nível': rest.level, 'Prioridade': rest.priority, 'Data Avaliação': rest.evaluationDate }));
-                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-                const filename = `KnowMap_Export_${new Date().toISOString().slice(0,10)}`;
-                if (format === 'csv') {
-                    const csv = XLSX.utils.sheet_to_csv(worksheet);
-                    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-                    const link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.setAttribute("download", `${filename}.csv`);
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                } else {
-                    const workbook = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(workbook, worksheet, "Conhecimentos");
-                    XLSX.writeFile(workbook, `${filename}.xlsx`);
-                }
-            };
-            document.getElementById('exportCsvBtn').addEventListener('click', () => exportData('csv'));
-            document.getElementById('exportXlsxBtn').addEventListener('click', () => exportData('xlsx'));
-            
-            // --- INICIALIZAÇÃO ---
-            const init = () => {
-                lucide.createIcons();
-                populateFilters();
-                renderTableHeader();
-                updateDashboard();
-            };
+             document.getElementById('addKnowledgeBtn').addEventListener('click', () => {
+                // Lógica para abrir modal de adição
+             });
+        };
 
-            init();
-        });
+        // --- LÓGICA DO GRÁFICO DE MONITORAMENTO ---
+        const setupEngagementChart = () => {
+             const chartCanvas = document.getElementById('engagementChart');
+             if (chartCanvas) {
+                new Chart(chartCanvas.getContext('2d'), { type: 'line',
+                    data: { labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+                        datasets: [{ label: 'Horas de Treinamento', data: [12, 19, 25, 35], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }]
+                    }, options: { responsive: true, maintainAspectRatio: false }
+                });
+             }
+        };
+
+        // --- INICIALIZAÇÃO ---
+        const init = () => {
+            lucide.createIcons();
+            switchView('biblioteca');
+        };
+
+        init();
+    });
     </script>
 </body>
 </html>
-
 
 
 
