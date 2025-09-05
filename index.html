@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KnowMap – Plataforma de Gestão</title>
+    <title>KnowMap – Plataforma de Gestão Estratégica</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js para os gráficos -->
@@ -46,6 +46,8 @@
             transition: transform 0.5s ease-in-out; z-index: 100;
         }
         #toast-notification.show { transform: translateX(0); }
+
+        .tab.active { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
     </style>
 </head>
 <body class="antialiased text-slate-700">
@@ -54,12 +56,35 @@
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex-col flex-shrink-0 fixed lg:relative h-full lg:flex z-40 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="px-6 py-5 flex items-center gap-3">
-                <i data-lucide="brain-circuit" class="text-indigo-600 h-8 w-8"></i>
+                <!-- Remodeled SVG Logo -->
+                <div class="w-10 h-10 flex-shrink-0">
+                    <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                            <!-- Bulb -->
+                            <circle cx="30" cy="25" r="14" fill="#FEEA9A" stroke="#2d3748" stroke-width="2"/>
+                            <!-- Base -->
+                            <rect x="22" y="38" width="16" height="5" fill="#2d3748" />
+                            <path d="M22 43 L 38 43" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M24 45 L 36 45" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+                            <!-- Dashed Path -->
+                            <path d="M10 32 C 20 15, 40 15, 50 32" fill="none" stroke="#2d3748" stroke-width="2" stroke-dasharray="3 3" stroke-linecap="round"/>
+                             <!-- Arrowhead -->
+                            <polygon points="50,32 46,28 49,32 46,36" fill="#2d3748"/>
+                            <!-- Rays -->
+                             <line x1="30" y1="5" x2="30" y2="9" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+                             <line x1="45" y1="15" x2="42" y2="18" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+                             <line x1="15" y1="15" x2="18" y2="18" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+                             <line x1="52" y1="25" x2="48" y2="25" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+                             <line x1="8" y1="25" x2="12" y2="25" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+                        </g>
+                    </svg>
+                </div>
                 <h1 class="text-2xl font-extrabold text-slate-800 tracking-tighter">KnowMap</h1>
             </div>
             <nav class="flex-1 px-4 py-4 space-y-2">
                 <a href="#" class="sidebar-link active flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="biblioteca"><i data-lucide="library" class="w-5 h-5"></i> Biblioteca</a>
                 <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="mapa"><i data-lucide="map" class="w-5 h-5"></i> Mapa de Conhecimentos</a>
+                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="desenvolvimento"><i data-lucide="award" class="w-5 h-5"></i> Desenvolvimento</a>
                 <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="monitoramento"><i data-lucide="activity" class="w-5 h-5"></i> Monitoramento</a>
             </nav>
         </aside>
@@ -69,7 +94,7 @@
             <!-- Header -->
             <header class="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-slate-200 z-30">
                 <div class="mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center justify-between h-16"><button id="menu-toggle" class="lg:hidden text-slate-600 hover:text-slate-800"><i data-lucide="menu" class="w-6 h-6"></i></button><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i><input id="globalSearchInput" type="text" placeholder="Buscar em toda a plataforma..." class="w-full sm:w-80 pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></div><div class="flex items-center gap-4"><div class="flex items-center gap-2 text-sm"><span class="font-semibold text-slate-700 hidden md:inline">Jhonatan</span><img src="https://placehold.co/40x40/eef2ff/4338ca?text=J" alt="Avatar do usuário" class="w-10 h-10 rounded-full border-2 border-indigo-200"></div></div></div>
+                    <div class="flex items-center justify-between h-16"><button id="menu-toggle" class="lg:hidden text-slate-600 hover:text-slate-800"><i data-lucide="menu" class="w-6 h-6"></i></button><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i><input id="globalSearchInput" type="text" placeholder="Buscar em toda a plataforma..." class="w-full sm:w-80 pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></div><div class="flex items-center gap-4"><div class="flex items-center gap-2 text-sm"><span id="loggedInUserName" class="font-semibold text-slate-700 hidden md:inline"></span><img src="https://placehold.co/40x40/eef2ff/4338ca?text=J" alt="Avatar do usuário" class="w-10 h-10 rounded-full border-2 border-indigo-200"></div></div></div>
                 </div>
             </header>
 
@@ -79,8 +104,32 @@
                 <div id="view-biblioteca" class="view-content"><div class="mb-6"><h2 class="text-2xl font-bold text-slate-800">Biblioteca de Procedimentos</h2><p class="text-slate-500 mt-1">Acesse treinamentos, guias e materiais de apoio.</p></div><div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div></div>
                 <!-- VIEW 2: Mapa -->
                 <div id="view-mapa" class="view-content hidden"><div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4"><div><h2 class="text-2xl font-bold text-slate-800">Mapa de Conhecimentos da Equipe</h2><p class="text-slate-500 mt-1">Visualize e compare o nível de domínio da sua equipe.</p></div><button id="addKnowledgeBtn" class="flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700 transition"><i data-lucide="plus-circle" class="w-5 h-5"></i> Adicionar Registro</button></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6"><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-indigo-100 p-3 rounded-full flex-shrink-0"><i data-lucide="bar-chart-big" class="text-indigo-600"></i></div><p class="text-sm text-slate-500">Média Geral</p></div><div class="mt-auto pt-4"><p id="kpiAvgValue" class="text-3xl font-bold text-slate-800">0.0</p></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-emerald-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-up" class="text-emerald-600"></i></div><p class="text-sm text-slate-500">Tema mais Forte</p></div><div class="mt-auto pt-4"><p id="kpiStrongestValue" class="text-xl font-bold text-slate-800 break-words">N/A</p></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-rose-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-down" class="text-rose-600"></i></div><p class="text-sm text-slate-500">Ponto de Atenção</p></div><div class="mt-auto pt-4"><p id="kpiWeakestValue" class="text-xl font-bold text-slate-800 break-words">N/A</p></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-sky-100 p-3 rounded-full flex-shrink-0"><i data-lucide="users" class="text-sky-600"></i></div><p class="text-sm text-slate-500">Colaboradores</p></div><div class="mt-auto pt-4"><p id="kpiTotalValue" class="text-3xl font-bold text-slate-800">0</p></div></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6"><h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2 text-base"><i data-lucide="filter" class="w-5 h-5"></i> Filtros e Ações</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end"><div><label for="collaboratorFilter" class="block mb-1 text-sm font-medium text-slate-600">Colaborador</label><select id="collaboratorFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div><div><label for="topicFilter" class="block mb-1 text-sm font-medium text-slate-600">Tema</label><select id="topicFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div><div><label for="chartTypeSelector" class="block mb-1 text-sm font-medium text-slate-600">Gráfico</label><select id="chartTypeSelector" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"><option value="bar">Barras</option><option value="radar">Radar</option><option value="doughnut">Rosca</option></select></div><div class="flex gap-3"><button id="exportCsvBtn" title="Exportar para CSV" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i> CSV</button><button id="exportXlsxBtn" title="Exportar para Excel" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i> Excel</button></div></div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6"><h3 class="text-lg font-semibold text-slate-800 mb-4">Registros Detalhados</h3><div class="overflow-x-auto"><table class="responsive-map-table w-full text-sm text-left text-slate-500"><thead class="text-xs text-slate-700 uppercase bg-slate-50"></thead><tbody id="knowledgeTableBody" class="divide-y divide-slate-200 md:divide-y-0"></tbody></table></div></div><div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 id="chartTitle" class="font-semibold text-slate-800 mb-4">Análise Visual</h3><div class="h-80"><canvas id="knowledgeChart"></canvas></div></div></div></div>
-                <!-- VIEW 3: Monitoramento -->
-                <div id="view-monitoramento" class="view-content hidden"><div class="mb-6"><h2 class="text-2xl font-bold text-slate-800">Monitoramento de Engajamento</h2><p class="text-slate-500 mt-1">Acompanhe a evolução, participação e destaques da equipe.</p></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Tempo total em treinamento</p><p class="text-3xl font-bold text-slate-800">128 <span class="text-lg font-medium text-slate-500">horas</span></p></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Treinamentos Concluídos</p><p class="text-3xl font-bold text-slate-800">32</p></div><div id="top-performer-kpi" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"></div></div><div class="grid grid-cols-1 lg:grid-cols-5 gap-6"><div class="lg:col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 class="font-semibold text-slate-800 mb-4">Evolução de Engajamento (Últimos 30 dias)</h3><div class="h-80"><canvas id="engagementChart"></canvas></div></div><div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 class="font-semibold text-slate-800 mb-4">Ranking de Colaboradores</h3><div id="ranking-list" class="overflow-y-auto h-80"></div></div></div></div>
+                <!-- VIEW 3: Desenvolvimento -->
+                <div id="view-desenvolvimento" class="view-content hidden">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Desenvolvimento Pessoal</h2>
+                            <p class="text-slate-500 mt-1">Acompanhe as trilhas de aprendizagem e conquistas de cada colaborador.</p>
+                        </div>
+                        <div>
+                            <label for="devCollaboratorFilter" class="block mb-1 text-sm font-medium text-slate-600">Analisar Colaborador</label>
+                            <select id="devCollaboratorFilter" class="w-full md:w-64 bg-white border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select>
+                        </div>
+                    </div>
+                    <div id="development-content-container">
+                        <!-- Conteúdo será renderizado aqui -->
+                    </div>
+                </div>
+                <!-- VIEW 4: Monitoramento -->
+                <div id="view-monitoramento" class="view-content hidden">
+                     <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">Monitoramento de Engajamento</h2>
+                        <p class="text-slate-500 mt-1">Acompanhe a evolução, participação e destaques da equipe.</p>
+                    </div>
+                    <div id="monitor-content">
+                        <!-- Conteúdo será renderizado aqui -->
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -100,23 +149,54 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- DADOS INICIAIS ---
+        const loggedInUser = 'Jhonatan';
         let libraryProcedures = [
-            { title: 'Apuração Lucro Presumido', icon: 'landmark', color: 'indigo', status: 'Concluído' },
-            { title: 'SPED Fiscal', icon: 'file-text', color: 'sky', status: 'Em Andamento' },
-            { title: 'Folha de Pagamento', icon: 'users', color: 'rose', status: 'Não Iniciado' },
-            { title: 'Retenções Federais', icon: 'receipt', color: 'amber', status: 'Não Iniciado' },
+            { id: 'lp', title: 'Apuração Lucro Presumido', icon: 'landmark', color: 'indigo' },
+            { id: 'sped', title: 'SPED Fiscal', icon: 'file-text', color: 'sky' },
+            { id: 'fp', title: 'Folha de Pagamento', icon: 'users', color: 'rose' },
+            { id: 'rf', title: 'Retenções Federais', icon: 'receipt', color: 'amber' },
+        ];
+        let learningPaths = [
+            { id: 'onboarding', title: 'Onboarding Fiscal', description: 'Conceitos essenciais para iniciar na área fiscal.', courses: ['lp', 'rf'] },
+            { id: 'analista_fiscal', title: 'Formação Analista Fiscal', description: 'Domine as principais obrigações fiscais.', courses: ['lp', 'sped', 'rf'] }
+        ];
+        let achievements = [
+            { id: 'primeiro_treino', title: 'Primeiros Passos', icon: 'footprints', description: 'Concluiu seu primeiro treinamento.', unlocked: false },
+            { id: 'especialista', title: 'Especialista', icon: 'star', description: 'Atingiu o nível máximo em um tema.', unlocked: false },
+            { id: 'polivalente', title: 'Polivalente', icon: 'git-fork', description: 'Domina 3 ou mais temas.', unlocked: false },
+            { id: 'mentor', title: 'Mentor', icon: 'award', description: 'É um especialista em um tema de alta prioridade.', unlocked: false },
+        ];
+        let userProgress = [
+            { user: 'Jhonatan', procedureId: 'lp', status: 'Concluído'},
+            { user: 'Jhonatan', procedureId: 'sped', status: 'Em Andamento'},
+            { user: 'Maria', procedureId: 'lp', status: 'Concluído'},
+            { user: 'Maria', procedureId: 'sped', status: 'Concluído'},
+            { user: 'Maria', procedureId: 'fp', status: 'Em Andamento'},
+            { user: 'Carlos', procedureId: 'sped', status: 'Concluído'},
+            { user: 'Ana', procedureId: 'fp', status: 'Não Iniciado'},
+            { user: 'João', procedureId: 'lp', status: 'Em Andamento' },
+            { user: 'Ryan', procedureId: 'rf', status: 'Concluído' },
+            { user: 'Ryan', procedureId: 'lp', status: 'Concluído' },
+        ];
+        let interactions = [
+            { from: 'João', to: 'Jhonatan', subject: 'Dúvida sobre SPED', date: '2025-09-04' },
+            { from: 'Ana', to: 'Maria', subject: 'Cálculo de Férias (Folha)', date: '2025-09-03' },
+            { from: 'Carlos', to: 'Ryan', subject: 'Bloco K - SPED Fiscal', date: '2025-09-02' },
+            { from: 'Jhonatan', to: 'Laura', subject: 'Revisão Planejamento Tributário', date: '2025-09-01' },
+            { from: 'João', to: 'Jhonatan', subject: 'Cálculo Trimestral', date: '2025-08-30' },
         ];
         let knowledgeData = [
-            { id: 1, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 10, priority: 'Alta', evaluationDate: '2025-08-20' },
-            { id: 2, name: 'Ryan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 9, priority: 'Alta', evaluationDate: '2025-08-20' },
-            { id: 3, name: 'João', role: 'Estagiário', topic: 'Apuração Lucro Presumido', level: 2, priority: 'Média', evaluationDate: '2025-08-15' },
-            { id: 4, name: 'Maria', role: 'Contadora Sênior', topic: 'SPED Fiscal', level: 9, priority: 'Alta', evaluationDate: '2025-08-18' },
-            { id: 5, name: 'Carlos', role: 'Analista Fiscal', topic: 'SPED Fiscal', level: 6, priority: 'Alta', evaluationDate: '2025-08-18' },
-            { id: 6, name: 'Ana', role: 'Estagiária', topic: 'Folha de Pagamento', level: 4, priority: 'Média', evaluationDate: '2025-08-19' },
-            { id: 7, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Folha de Pagamento', level: 7, priority: 'Baixa', evaluationDate: '2025-08-20' },
-            { id: 8, name: 'Laura', role: 'Gerente Contábil', topic: 'Planejamento Tributário', level: 10, priority: 'Alta', evaluationDate: '2025-08-21' },
-            { id: 9, name: 'Pedro', role: 'Analista Contábil', topic: 'Planejamento Tributário', level: 7, priority: 'Alta', evaluationDate: '2025-08-21' },
-            { id: 10, name: 'Ryan', role: 'Analista Fiscal', topic: 'Retenções Federais', level: 5, priority: 'Média', evaluationDate: '2025-08-17' },
+            { id: 1, name: 'Jhonatan', role: 'Analista Fiscal Sênior', topic: 'Apuração Lucro Presumido', level: 10, priority: 'Alta', evaluationDate: '2025-08-20', trainingHours: 15 },
+            { id: 2, name: 'Ryan', role: 'Analista Fiscal Pleno', topic: 'Apuração Lucro Presumido', level: 8, priority: 'Alta', evaluationDate: '2025-08-20', trainingHours: 12 },
+            { id: 3, name: 'João', role: 'Estagiário Fiscal', topic: 'Apuração Lucro Presumido', level: 3, priority: 'Média', evaluationDate: '2025-09-01', trainingHours: 5 },
+            { id: 4, name: 'Maria', role: 'Contadora Sênior', topic: 'SPED Fiscal', level: 9, priority: 'Alta', evaluationDate: '2025-08-18', trainingHours: 20 },
+            { id: 5, name: 'Carlos', role: 'Analista Fiscal Jr', topic: 'SPED Fiscal', level: 6, priority: 'Alta', evaluationDate: '2025-08-28', trainingHours: 8 },
+            { id: 6, name: 'Ana', role: 'Estagiária Contábil', topic: 'Folha de Pagamento', level: 4, priority: 'Média', evaluationDate: '2025-09-02', trainingHours: 10 },
+            { id: 7, name: 'Jhonatan', role: 'Analista Fiscal Sênior', topic: 'Folha de Pagamento', level: 7, priority: 'Baixa', evaluationDate: '2025-08-20', trainingHours: 6 },
+            { id: 8, name: 'Laura', role: 'Gerente Contábil', topic: 'Planejamento Tributário', level: 10, priority: 'Alta', evaluationDate: '2025-08-21', trainingHours: 25 },
+            { id: 9, name: 'Pedro', role: 'Analista Contábil Pleno', topic: 'Planejamento Tributário', level: 7, priority: 'Alta', evaluationDate: '2025-08-25', trainingHours: 11 },
+            { id: 10, name: 'Ryan', role: 'Analista Fiscal Pleno', topic: 'Retenções Federais', level: 7, priority: 'Média', evaluationDate: '2025-08-17', trainingHours: 16 },
+            { id: 11, name: 'Maria', role: 'Contadora Sênior', topic: 'Folha de Pagamento', level: 8, priority: 'Média', evaluationDate: '2025-08-18', trainingHours: 14 },
         ];
         
         // --- ELEMENTOS GLOBAIS ---
@@ -124,7 +204,7 @@
         const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
         // --- LÓGICA DE NAVEGAÇÃO E INICIALIZAÇÃO ---
-        let isMapInitialized = false, isMonitoringInitialized = false;
+        let isMapInitialized = false, isMonitoringInitialized = false, isDevInitialized = false;
         const switchView = (viewId) => {
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
@@ -132,6 +212,7 @@
             if (window.innerWidth < 1024) document.getElementById('sidebar').classList.add('-translate-x-full');
 
             if (viewId === 'mapa' && !isMapInitialized) { initMapModule(); isMapInitialized = true; }
+            if (viewId === 'desenvolvimento' && !isDevInitialized) { initDevelopmentModule(); isDevInitialized = true; }
             if (viewId === 'monitoramento' && !isMonitoringInitialized) { initMonitoringModule(); isMonitoringInitialized = true; }
         };
         
@@ -167,21 +248,22 @@
         const libraryGrid = document.getElementById('library-grid');
         const libraryDetailModal = document.getElementById('libraryDetailModal');
         const renderLibrary = () => {
-            const statusStyles = {
-                'Concluído': 'text-emerald-800 bg-emerald-100',
-                'Em Andamento': 'text-amber-800 bg-amber-100',
-                'Não Iniciado': 'text-slate-800 bg-slate-200',
-            };
+            const loggedInUserProgress = userProgress.filter(p => p.user === loggedInUser);
+            const statusStyles = {'Concluído': 'text-emerald-800 bg-emerald-100','Em Andamento': 'text-amber-800 bg-amber-100','Não Iniciado': 'text-slate-800 bg-slate-200'};
             const colorStyles = { 'indigo': 'bg-indigo-100 text-indigo-600', 'sky': 'bg-sky-100 text-sky-600', 'rose': 'bg-rose-100 text-rose-600', 'amber': 'bg-amber-100 text-amber-600' };
             
-            libraryGrid.innerHTML = libraryProcedures.map(p => `
+            libraryGrid.innerHTML = libraryProcedures.map(p => {
+                const progress = loggedInUserProgress.find(item => item.procedureId === p.id);
+                const status = progress ? progress.status : 'Não Iniciado';
+                return `
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer library-card" data-title="${p.title}">
                     <div class="flex items-center gap-4 mb-4">
                         <div class="p-3 rounded-lg ${colorStyles[p.color]}"><i data-lucide="${p.icon}"></i></div>
                         <h3 class="font-semibold text-slate-800">${p.title}</h3>
                     </div>
-                    <div class="flex items-center justify-between text-xs"><span class="font-semibold text-slate-600">Seu Progresso:</span><span class="px-2 py-1 font-semibold rounded-full ${statusStyles[p.status]}">${p.status}</span></div>
-                </div>`).join('');
+                    <div class="flex items-center justify-between text-xs"><span class="font-semibold text-slate-600">Seu Progresso:</span><span class="px-2 py-1 font-semibold rounded-full ${statusStyles[status]}">${status}</span></div>
+                </div>`
+            }).join('');
             lucide.createIcons();
         };
         libraryGrid.addEventListener('click', e => {
@@ -214,13 +296,21 @@
         const renderTable = (data) => {
             const tbody = document.getElementById('knowledgeTableBody'), thead = tbody.previousElementSibling;
             thead.innerHTML = `<tr><th class="px-6 py-3">Colaborador</th><th class="px-6 py-3">Tema</th><th class="px-6 py-3 w-48">Nível</th><th class="px-6 py-3">Ações</th></tr>`;
-            tbody.innerHTML = data.length ? data.map(item => `
+            tbody.innerHTML = data.length ? data.map(item => {
+                let actions = `
+                    <button class="edit-btn p-1 text-indigo-600 hover:text-indigo-800 transition" data-id="${item.id}" title="Editar"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
+                    <button class="delete-btn p-1 text-rose-600 hover:text-rose-800 transition" data-id="${item.id}" title="Excluir"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                `;
+                if(item.level >= 9 && item.name !== loggedInUser) {
+                     actions += `<button class="contact-expert-btn p-1 text-sky-600 hover:text-sky-800 transition" data-name="${item.name}" data-topic="${item.topic}" title="Contatar Especialista"><i data-lucide="message-circle" class="w-5 h-5"></i></button>`;
+                }
+                return `
                 <tr>
-                    <td class="px-6 py-4" data-label="Colaborador"><div class="flex items-center gap-2"><div class="font-medium text-slate-900">${item.name}</div><button class="send-btn text-slate-400 hover:text-indigo-600 transition" title="Enviar para ${item.name}" data-name="${item.name}"><i data-lucide="send" class="w-4 h-4"></i></button></div><div class="text-xs text-slate-500">${item.role}</div></td>
+                    <td class="px-6 py-4" data-label="Colaborador"><div class="font-medium text-slate-900">${item.name}</div><div class="text-xs text-slate-500">${item.role}</div></td>
                     <td class="px-6 py-4" data-label="Tema">${item.topic}</td>
                     <td class="px-6 py-4" data-label="Nível">${getLevelDisplay(item.level)}</td>
-                    <td class="px-6 py-4" data-label="Ações"><div class="flex gap-3 justify-end md:justify-start"><button class="edit-btn p-1 text-indigo-600 hover:text-indigo-800 transition" data-id="${item.id}" title="Editar"><i data-lucide="edit-3" class="w-5 h-5"></i></button><button class="delete-btn p-1 text-rose-600 hover:text-rose-800 transition" data-id="${item.id}" title="Excluir"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div></td>
-                </tr>`).join('') : `<tr><td colspan="4" class="text-center p-8 text-slate-500">Nenhum registro encontrado.</td></tr>`;
+                    <td class="px-6 py-4" data-label="Ações"><div class="flex gap-3 justify-end md:justify-start">${actions}</div></td>
+                </tr>`}).join('') : `<tr><td colspan="4" class="text-center p-8 text-slate-500">Nenhum registro encontrado.</td></tr>`;
             lucide.createIcons();
         };
 
@@ -238,9 +328,7 @@
         const updateChart = (data, type) => {
             const ctx = document.getElementById('knowledgeChart').getContext('2d');
             if (knowledgeChart) knowledgeChart.destroy();
-            if (!ctx || !data.length) {
-                return;
-            }
+            if (!ctx || !data.length) return;
             const isCollabView = currentFilters.collaborator !== 'all';
             document.getElementById('chartTitle').textContent = isCollabView ? `Desempenho de ${currentFilters.collaborator}` : `Comparativo por Tema: ${currentFilters.topic === 'all' ? 'Geral' : currentFilters.topic}`;
             knowledgeChart = new Chart(ctx, { type,
@@ -249,13 +337,22 @@
             });
         };
         
-        const populateFilters = () => {
-            ['collaboratorFilter', 'topicFilter'].forEach(id => {
-                const el = document.getElementById(id), key = id.includes('collab') ? 'name' : 'topic';
-                const items = ['Todos', ...new Set(knowledgeData.map(i => i[key]).sort())];
-                el.innerHTML = items.map(i => `<option value="${i==='Todos'?'all':i}">${i}</option>`).join('');
-                el.value = currentFilters[key];
-            });
+        const populateFilters = (selectId, dataKey) => {
+            const selectEl = document.getElementById(selectId);
+            if (!selectEl) return;
+            let items = [...new Set(knowledgeData.map(i => i[dataKey]).sort())];
+            if (selectId.includes('Filter')) {
+                items.unshift('Todos');
+                if (selectId === 'monitorCollaboratorFilter') items[0] = 'Visão Geral da Equipe';
+                if (selectId === 'devCollaboratorFilter') items[0] = 'Selecione um colaborador';
+            }
+            
+            selectEl.innerHTML = items.map((i, index) => {
+                let value = i;
+                if(index === 0 && (selectId.includes('Filter'))) value = 'all';
+                let disabled = selectId === 'devCollaboratorFilter' && index === 0 ? 'disabled selected' : '';
+                return `<option value="${value}" ${disabled}>${i}</option>`
+            }).join('');
         };
 
         const applyFiltersAndRender = () => {
@@ -278,16 +375,18 @@
                 knowledgeData = knowledgeData.map(i => i.id === id ? { ...i, ...record } : i);
                 showToast('Registro atualizado com sucesso!');
             } else {
-                knowledgeData.push({ ...record, id: Date.now() });
+                knowledgeData.push({ ...record, id: Date.now(), trainingHours: Math.floor(Math.random() * 10) + 1 });
                 showToast('Novo registro adicionado!');
             }
             closeModal(knowledgeModal);
-            populateFilters();
+            ['collaboratorFilter', 'topicFilter', 'devCollaboratorFilter', 'monitorCollaboratorFilter'].forEach(id => populateFilters(id, 'name'));
             applyFiltersAndRender();
         };
 
         const initMapModule = () => {
-            populateFilters(); applyFiltersAndRender();
+            populateFilters('collaboratorFilter', 'name');
+            populateFilters('topicFilter', 'topic');
+            applyFiltersAndRender();
             document.getElementById('addKnowledgeBtn').addEventListener('click', () => {
                 knowledgeForm.reset(); document.getElementById('editId').value = '';
                 document.getElementById('modalTitle').textContent = 'Adicionar Novo Registro';
@@ -296,7 +395,7 @@
                 openModal(knowledgeModal);
             });
             document.getElementById('knowledgeTableBody').addEventListener('click', e => {
-                const editBtn = e.target.closest('.edit-btn'), deleteBtn = e.target.closest('.delete-btn'), sendBtn = e.target.closest('.send-btn');
+                const editBtn = e.target.closest('.edit-btn'), deleteBtn = e.target.closest('.delete-btn'), contactBtn = e.target.closest('.contact-expert-btn');
                 if (editBtn) {
                     const item = knowledgeData.find(i => i.id === parseInt(editBtn.dataset.id));
                     Object.keys(item).forEach(k => { if(knowledgeForm.elements[k]) knowledgeForm.elements[k].value = item[k]; });
@@ -306,12 +405,14 @@
                     openModal(knowledgeModal);
                 }
                 if (deleteBtn) { deleteId = parseInt(deleteBtn.dataset.id); openModal(confirmModal); }
-                if (sendBtn) showToast(`Mensagem enviada para ${sendBtn.dataset.name}!`);
+                if (contactBtn) showToast(`Dúvida sobre ${contactBtn.dataset.topic} enviada para ${contactBtn.dataset.name}!`);
             });
             document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
                 knowledgeData = knowledgeData.filter(i => i.id !== deleteId);
                 closeModal(confirmModal); showToast('Registro excluído com sucesso!');
-                populateFilters(); applyFiltersAndRender();
+                populateFilters('collaboratorFilter', 'name');
+                populateFilters('topicFilter', 'topic');
+                applyFiltersAndRender();
             });
             knowledgeForm.addEventListener('submit', handleFormSubmit);
             knowledgeForm.querySelector('#level').addEventListener('input', e => document.getElementById('levelValue').textContent = e.target.value);
@@ -339,44 +440,147 @@
             });
         };
 
-        // --- MÓDULO: MONITORAMENTO ---
-        const initMonitoringModule = () => {
-            new Chart(document.getElementById('engagementChart').getContext('2d'), { type: 'line',
-                data: { labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], datasets: [{ label: 'Horas de Treinamento', data: [12, 19, 25, 35], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false }
+        // --- MÓDULO: DESENVOLVIMENTO ---
+        const renderDevelopmentView = (collaboratorName) => {
+            const container = document.getElementById('development-content-container');
+            if (!collaboratorName || collaboratorName === 'all') {
+                container.innerHTML = `<div class="text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200"><i data-lucide="user-check" class="mx-auto w-12 h-12 text-indigo-400"></i><p class="mt-4 font-semibold text-slate-700">Selecione um colaborador</p><p class="text-sm text-slate-500">Escolha um membro da equipe no menu acima para ver seus detalhes de desenvolvimento.</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const userKnw = knowledgeData.filter(i => i.name === collaboratorName);
+            const userPrg = userProgress.filter(p => p.user === collaboratorName);
+
+            achievements.forEach(a => a.unlocked = false);
+            achievements.find(a => a.id === 'primeiro_treino').unlocked = userPrg.some(p => p.status === 'Concluído');
+            achievements.find(a => a.id === 'especialista').unlocked = userKnw.some(k => k.level === 10);
+            achievements.find(a => a.id === 'polivalente').unlocked = [...new Set(userKnw.map(k => k.topic))].length >= 3;
+            achievements.find(a => a.id === 'mentor').unlocked = userKnw.some(k => k.level >= 9 && k.priority === 'Alta');
+
+            const pathsHTML = learningPaths.map(path => {
+                const coursesInPath = path.courses;
+                const completedCourses = userPrg.filter(p => coursesInPath.includes(p.procedureId) && p.status === 'Concluído').length;
+                const progress = coursesInPath.length > 0 ? (completedCourses / coursesInPath.length) * 100 : 0;
+                return `
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg text-slate-800">${path.title}</h4>
+                    <p class="text-sm text-slate-500 mt-1 mb-4">${path.description}</p>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 mb-2">
+                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${progress}%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 text-right">${Math.round(progress)}% concluído</p>
+                </div>`;
+            }).join('');
+
+            const achievementsHTML = achievements.map(ach => `
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center ${!ach.unlocked ? 'opacity-50' : ''}">
+                    <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center ${ach.unlocked ? 'bg-amber-100' : 'bg-slate-100'}">
+                        <i data-lucide="${ach.icon}" class="${ach.unlocked ? 'text-amber-500' : 'text-slate-400'}"></i>
+                    </div>
+                    <p class="font-semibold text-sm mt-3 text-slate-700">${ach.title}</p>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">Trilhas de Aprendizagem de ${collaboratorName}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">${pathsHTML}</div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">Conquistas de ${collaboratorName}</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">${achievementsHTML}</div>
+                </div>`;
+            lucide.createIcons();
+        };
+
+        const initDevelopmentModule = () => {
+            const filterEl = document.getElementById('devCollaboratorFilter');
+            populateFilters('devCollaboratorFilter', 'name');
+            filterEl.addEventListener('change', (e) => {
+                renderDevelopmentView(e.target.value);
             });
-            const scores = knowledgeData.reduce((acc, item) => {
+            renderDevelopmentView('all');
+        };
+
+        // --- MÓDULO: MONITORAMENTO ---
+        const renderMonitoringView = (filterTerm = '') => {
+            const dataToUse = filterTerm 
+                ? knowledgeData.filter(i => i.name.toLowerCase().includes(filterTerm))
+                : knowledgeData;
+
+            const progressToUse = filterTerm
+                ? userProgress.filter(p => p.user.toLowerCase().includes(filterTerm))
+                : userProgress;
+
+            const totalHours = dataToUse.reduce((sum, item) => sum + (item.trainingHours || 0), 0);
+            const completedCount = progressToUse.filter(item => item.status === 'Concluído').length;
+            
+            const scores = dataToUse.reduce((acc, item) => {
                 acc[item.name] = (acc[item.name] || 0) + item.level;
                 return acc;
             }, {});
-            const ranked = Object.entries(scores).sort(([,a],[,b]) => b-a);
-            document.getElementById('top-performer-kpi').innerHTML = `<p class="text-sm text-slate-500 mb-2">Colaborador Destaque</p><p class="text-xl font-bold text-slate-800">${ranked[0]?.[0] || 'N/A'}</p>`;
-            document.getElementById('ranking-list').innerHTML = ranked.map(([name, score], i) => `
-                <div class="flex items-center justify-between py-3 ${i < ranked.length - 1 ? 'border-b border-slate-100' : ''}">
-                    <div class="flex items-center gap-3"><span class="font-bold text-sm w-5 text-center">${i+1}</span><span class="font-medium text-slate-700">${name}</span></div>
-                    <span class="font-bold text-indigo-600">${score} pts</span>
-                </div>`).join('');
+            const ranked = Object.entries(scores).sort(([,a],[,b]) => b - a);
+
+            const container = document.getElementById('monitor-content');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Tempo total em treinamento</p><p class="text-3xl font-bold text-slate-800">${totalHours} <span class="text-lg font-medium text-slate-500">horas</span></p></div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Treinamentos Concluídos</p><p class="text-3xl font-bold text-slate-800">${completedCount}</p></div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Colaborador Destaque</p><p class="text-xl font-bold text-slate-800">${ranked.length > 0 ? ranked[0][0] : 'N/A'}</p></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                    <div class="lg:col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="font-semibold text-slate-800 mb-4">Evolução de Engajamento (Equipe)</h3>
+                        <div class="h-80"><canvas id="engagementChart"></canvas></div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="font-semibold text-slate-800 mb-4">Ranking de Colaboradores</h3>
+                        <div id="ranking-list" class="overflow-y-auto h-80"></div>
+                    </div>
+                </div>`;
+            
+            const rankingListEl = document.getElementById('ranking-list');
+            if(ranked.length > 0) {
+                 rankingListEl.innerHTML = ranked.map(([name, score], i) => `
+                    <div class="flex items-center justify-between py-3 ${i < ranked.length - 1 ? 'border-b border-slate-100' : ''}">
+                        <div class="flex items-center gap-3"><span class="font-bold text-sm w-5 text-center">${i+1}</span><span class="font-medium text-slate-700">${name}</span></div>
+                        <span class="font-bold text-indigo-600">${score} pts</span>
+                    </div>`).join('');
+            } else {
+                rankingListEl.innerHTML = `<p class="text-center p-8 text-slate-500">Nenhum colaborador encontrado.</p>`;
+            }
+
+            const chartCtx = document.getElementById('engagementChart').getContext('2d');
+            new Chart(chartCtx, { type: 'line', data: { labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], datasets: [{ label: 'Horas de Treinamento', data: [45, 59, 80, 81], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false } });
         };
         
+        const initMonitoringModule = () => {
+             renderMonitoringView();
+        };
+
         // --- FUNÇÕES GLOBAIS ---
         const showToast = (message) => {
             const toast = document.getElementById('toast-notification'), msgEl = document.getElementById('toast-message');
             msgEl.textContent = message; toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         };
+        
         document.getElementById('globalSearchInput').addEventListener('input', e => {
             const term = e.target.value.toLowerCase();
-            if (!document.getElementById('view-mapa').classList.contains('hidden')) {
+            const activeView = document.querySelector('.view-content:not(.hidden)').id;
+            if (activeView === 'view-mapa') {
                 const data = knowledgeData.filter(i => Object.values(i).some(v => String(v).toLowerCase().includes(term)));
                 renderTable(data);
-            } else {
-                 document.querySelectorAll('.library-card').forEach(card => {
-                    card.style.display = card.dataset.title.toLowerCase().includes(term) ? '' : 'none';
-                });
+            } else if (activeView === 'view-monitoramento') {
+                renderMonitoringView(term);
+            } else if (activeView === 'view-biblioteca') {
+                 document.querySelectorAll('.library-card').forEach(card => card.style.display = card.dataset.title.toLowerCase().includes(term) ? '' : 'none');
             }
         });
 
         // --- INICIALIZAÇÃO ---
+        document.getElementById('loggedInUserName').textContent = loggedInUser;
         renderLibrary();
         switchView('biblioteca');
         document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('-translate-x-full'));
