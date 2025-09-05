@@ -1,531 +1,4 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>KnowMap - Plataforma de Conhecimento</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #f7f8fa;
-      --white: #fff;
-      --primary: #508be6;
-      --secondary: #bdbff7;
-      --success: #62d4b6;
-      --text: #272838;
-      --gray: #b6b6c3;
-      --card: #f3f5fa;
-      --rounded: 16px;
-      --sidebar-width: 230px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0;}
-    body {
-      font-family: "Poppins", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .container {
-      display: flex;
-      min-height: 100vh;
-    }
-    .sidebar {
-      width: var(--sidebar-width);
-      background: var(--white);
-      border-right: 1px solid #e3e5ee;
-      padding:  36px 0 0 0;
-      position: fixed; top: 0; left: 0; height: 100vh;
-      display: flex; flex-direction: column; align-items: center;
-      z-index: 10;
-    }
-    .sidebar nav {
-      width: 100%;
-      margin-top: 48px;
-    }
-    .sidebar nav a {
-      display: flex;
-      align-items: center;
-      padding: 12px 36px;
-      font-size: 1.07rem;
-      color: var(--text);
-      text-decoration: none;
-      border-left: 4px solid transparent;
-      transition: 0.18s;
-      gap: 16px;
-      font-weight: 500;
-    }
-    .sidebar nav a.active, .sidebar nav a:hover {
-      background: var(--card);
-      color: var(--primary);
-      border-left: 4px solid var(--primary);
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-text {
-      font-weight: 700;
-      font-size: 1.45rem;
-      color: var(--primary);
-      letter-spacing: 1px;
-      font-family: 'Poppins', sans-serif;
-    }
-    .header {
-      width: calc(100% - var(--sidebar-width));
-      margin-left: var(--sidebar-width);
-      position: fixed; top: 0; left: 0;
-      height: 64px;
-      background: var(--white);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #e3e5ee;
-      padding: 0 48px 0 36px;
-      z-index: 99;
-    }
-    .search-global {
-      background: var(--bg);
-      border: none;
-      padding: 9px 16px;
-      border-radius: var(--rounded);
-      width: 310px;
-      font-size: 1rem;
-      color: var(--text);
-      outline: none;
-      margin-right: 16px;
-      transition: 0.17s;
-      border: 1px solid transparent;
-    }
-    .search-global:focus {
-      border: 1.8px solid var(--primary);
-      background: #f0f5fe;
-    }
-    .avatar {
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #bdbff7 0%, #508be6 100%);
-      display: flex;
-      align-items: center; justify-content: center;
-      color: var(--white); font-weight: bold;
-      font-size: 1.15rem;
-      cursor: pointer;
-      position: relative;
-    }
-    /* --- MAIN --- */
-    main {
-      flex: 1;
-      margin-top: 64px;
-      margin-left: var(--sidebar-width);
-      padding: 38px 48px 48px 48px;
-      min-height: 100vh;
-    }
-    /* Biblioteca de Procedimentos */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 22px;
-      margin-top: 36px;
-    }
-    .proc-card {
-      background: var(--white);
-      border-radius: var(--rounded);
-      padding: 28px 22px 20px 22px;
-      display: flex; flex-direction: column; align-items: flex-start;
-      gap: 23px;
-      box-shadow: 0 2px 12px rgba(94,125,220,0.07);
-      border: 1.5px solid #e3e5ee;
-      transition: box-shadow 0.14s;
-      cursor: pointer;
-    }
-    .proc-card:hover {
-      box-shadow: 0 8px 20px rgba(94,125,220,0.11);
-      border-color: var(--primary);
-    }
-    .proc-icon {
-      width: 37px; height: 37px;
-      background: var(--card);
-      border-radius: 50%;
-      display: flex;
-      align-items: center; justify-content: center;
-      color: var(--primary);
-      font-size: 1.23rem;
-    }
-    .proc-title {
-      font-weight: 600;
-      font-size: 1.13rem;
-      margin-bottom: 6px;
-    }
-    .proc-status {
-      font-size: 0.99rem;
-      background: var(--bg);
-      padding: 3px 12px;
-      border-radius: 999px;
-      color: var(--primary);
-      font-weight: 500;
-    }
-    /* --- Knowledge Map --- */
-    .map-section {
-      margin-top: 32px;
-    }
-    .map-title {
-      font-size: 1.41rem; font-weight: 700; margin-bottom: 8px;
-    }
-    .map-desc {
-      color: var(--gray); font-size: 1.05rem; margin-bottom: 22px;
-    }
-    .knowledge-table {
-      width: 100%;
-      background: var(--white);
-      border-radius: var(--rounded);
-      box-shadow: 0 2px 12px rgba(94,125,220,0.07);
-      border-collapse: collapse;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-    .knowledge-table th, .knowledge-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #ececf4;
-      text-align: left;
-      font-size: 1.04rem;
-    }
-    .knowledge-table th {
-      background: #f1f4fb;
-      color: var(--primary);
-      font-size: 1.03rem;
-      font-weight: 700;
-      letter-spacing: .5px;
-    }
-    .knowledge-table tr:hover td {
-      background: #f3f7fd;
-    }
-    .progress-bar {
-      background: #d0e5fb;
-      border-radius: 10px;
-      width: 100px; height: 9px;
-      overflow: hidden;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .progress-inner {
-      background: var(--primary);
-      height: 100%;
-      border-radius: 10px;
-    }
-    /* Botãos */
-    .button {
-      background: var(--primary);
-      color: var(--white)!important;
-      border: none;
-      border-radius: var(--rounded);
-      padding: 8px 25px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 12px;
-      transition: background 0.18s;
-      outline: none;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .button:hover {
-      background: #356fc1;
-    }
-    .button.secondary {
-      background: var(--secondary);
-      color: var(--primary)!important;
-    }
-    .button.export {
-      float: right;
-      font-size: 0.95rem;
-      background: #e1eaff;
-      color: var(--primary)!important;
-      padding: 6px 14px;
-      border-radius: 7px;
-    }
-    .filter-bar {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
-    }
-    .filter-bar select {
-      padding: 7px 13px;
-      border-radius: 8px;
-      border: 1px solid #dee2ee;
-      background: var(--white);
-      font-size: 1rem;
-      color: var(--text);
-    }
-    .kpi-cards {
-      display: flex; gap: 22px; margin-bottom: 27px;
-      flex-wrap: wrap;
-    }
-    .kpi-card {
-      flex: 1;
-      min-width: 170px;
-      background: var(--white);
-      border-radius: var(--rounded);
-      padding: 22px 18px;
-      box-shadow: 0 2px 12px rgba(94,125,220,0.04);
-      display: flex; flex-direction: column;
-      gap: 7px;
-      align-items: flex-start;
-    }
-    .kpi-value { font-weight: 700; font-size: 1.4rem; color: var(--primary);}
-    .kpi-label { font-size: 1.07rem; color: var(--gray);}
-    /* Dashboard graphs - example */
-    .dashboard-graph {
-      background: var(--white);
-      border-radius: var(--rounded);
-      padding: 36px 18px;
-      margin-top: 16px;
-      min-height: 180px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--gray);
-      font-size: 1.03rem;
-      box-shadow: 0 2px 12px rgba(94,125,220,0.04);
-    }
-    /* Responsive */
-    @media (max-width: 980px) {
-      .header { padding: 0 18px;}
-      .search-global { width: 170px;}
-      main { padding: 28px 10px 32px 10px;}
-    }
-    @media (max-width: 720px) {
-      .sidebar { width: 62px; min-width: 52px;}
-      .sidebar nav a { justify-content: center; padding: 14px 13px; font-size: 0.84rem; }
-      .sidebar nav a span { display: none;}
-      .logo-text { display: none;}
-      .header { margin-left: 62px; width: calc(100% - 62px);}
-      main { margin-left: 62px; }
-    }
-    @media (max-width: 600px) {
-      .sidebar { display: none;}
-      .header { margin-left: 0; width: 100%; }
-      main { margin-left: 0; }
-    }
-  </style>
-</head>
-<body>
-<div class="container">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo">
-      <svg width="32" height="32" fill="none" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#508be6"/><circle cx="30" cy="30" r="14" fill="#fff"/><rect x="16" y="28" width="28" height="4" rx="2" fill="#fff"/></svg>
-      <span class="logo-text">KnowMap</span>
-    </div>
-    <nav>
-      <a href="#biblioteca" class="active">
-        <span aria-hidden="true">
-        <!-- book icon outline -->
-        <svg width="24" height="24" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19a2 2 0 0 1 2-2h14" /><path d="M4 4h16v16" /><path d="M4 4v16" /></svg>
-        </span>
-        <span>Biblioteca de Procedimentos</span>
-      </a>
-      <a href="#mapa">
-        <span aria-hidden="true">
-        <!-- chart icon outline -->
-        <svg width="24" height="24" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="14" width="3" height="4"/><rect x="12" y="10" width="3" height="8"/><rect x="17" y="6" width="3" height="12"/></svg>
-        </span>
-        <span>Mapa de Conhecimentos</span>
-      </a>
-      <a href="#engajamento">
-        <span aria-hidden="true">
-        <!-- activity icon outline -->
-        <svg width="24" height="24" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12h4l3 7 4-14 3 7h4"/></svg>
-        </span>
-        <span>Monitoramento de Engajamento</span>
-      </a>
-    </nav>
-  </aside>
-  <!-- HEADER -->
-  <header class="header">
-    <div class="logo">
-      <svg width="28" height="28" fill="none" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="28" fill="#508be6"/><circle cx="30" cy="30" r="14" fill="#fff"/><rect x="16" y="28" width="28" height="4" rx="2" fill="#fff"/></svg>
-        <span class="logo-text">KnowMap</span>
-    </div>
-    <input class="search-global" type="text" placeholder="Pesquisar colaborador, tema, procedimento..."/>
-    <div class="avatar" title="Menu pessoal">LB</div>
-  </header>
-  <!-- MAIN CONTENT -->
-  <main>
-    <!-- BIBLIOTECA DE PROCEDIMENTOS (default) -->
-    <section id="biblioteca">
-      <h1 style="font-size:2rem;font-weight:700;letter-spacing:.5px;">Biblioteca de Procedimentos</h1>
-      <p style="color:var(--gray);margin-top:2px;">
-        Acesse rapidamente os principais procedimentos fiscais, contábeis e administrativos. Filtre por área ou pesquise por palavra-chave.
-      </p>
-      <div class="cards-grid">
-        <div class="proc-card">
-          <div class="proc-icon">
-            <!-- Tax icon (outline) -->
-            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><circle cx="12" cy="13" r="3"/></svg>
-          </div>
-          <div>
-            <div class="proc-title">Apuração Lucro Presumido</div>
-            <div class="proc-status" style="background: #e1eaff;color: var(--primary);">Em andamento</div>
-          </div>
-        </div>
-        <div class="proc-card">
-          <div class="proc-icon">
-            <!-- Sped icon (outline) -->
-            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2v8l7-4z"/><rect x="3" y="12" width="16" height="8" rx="2"/></svg>
-          </div>
-          <div>
-            <div class="proc-title">SPED Fiscal</div>
-            <div class="proc-status" style="background: #d3f3ea;color: #18bfa6;">Concluído</div>
-          </div>
-        </div>
-        <div class="proc-card">
-          <div class="proc-icon">
-            <!-- Payroll icon (outline) -->
-            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M16 9h.01"/><path d="M8 9h.01"/><path d="M12 13l-2 2h4z"/></svg>
-          </div>
-          <div>
-            <div class="proc-title">Folha de Pagamento</div>
-            <div class="proc-status" style="background: #fce7e8;color: #f35b68;">Não iniciado</div>
-          </div>
-        </div>
-        <div class="proc-card">
-          <div class="proc-icon">
-            <!-- Routine icon -->
-            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6"/></svg>
-          </div>
-          <div>
-            <div class="proc-title">Rotinas Administrativas</div>
-            <div class="proc-status" style="background: #e1eaff;color: var(--primary);">Em andamento</div>
-          </div>
-        </div>
-        <div class="proc-card">
-          <div class="proc-icon">
-            <!-- Financial icon -->
-            <svg width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-          </div>
-          <div>
-            <div class="proc-title">Conciliação Financeira</div>
-            <div class="proc-status" style="background: #d3f3ea;color: #18bfa6;">Concluído</div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- MAPA DE CONHECIMENTO (invisible by default) -->
-    <section id="mapa" style="display:none;">
-      <div class="map-section">
-        <div class="map-title">Mapa de Conhecimentos da Equipe</div>
-        <div class="map-desc">
-          Visualize e compare o nível de domínio da sua equipe. Identifique pontos fortes e lacunas de conhecimento.
-        </div>
-        <div class="filter-bar">
-          <label>Filtrar colaborador:
-            <select>
-              <option>Todos</option>
-              <option>João Silva</option>
-              <option>Maria Rosa</option>
-              <option>Luana Braga</option>
-            </select>
-          </label>
-          <a href="#" class="button" style="font-size:0.96rem;">Adicionar conhecimento</a>
-          <a href="#" class="button export">Exportar CSV/Excel</a>
-        </div>
-        <table class="knowledge-table">
-          <tr>
-            <th>Nome</th>
-            <th>Cargo</th>
-            <th>Tema</th>
-            <th>Nível <span style="font-weight:400; font-size:0.92em;">(0-10)</span></th>
-          </tr>
-          <tr>
-            <td>João Silva</td>
-            <td>Analista Fiscal</td>
-            <td>SPED Fiscal</td>
-            <td><div class="progress-bar"><div class="progress-inner" style="width: 85%;"></div></div> 8,5</td>
-          </tr>
-          <tr>
-            <td>Maria Rosa</td>
-            <td>Contadora</td>
-            <td>Lucro Presumido</td>
-            <td><div class="progress-bar"><div class="progress-inner" style="width: 100%;background:var(--success)"></div></div> 10</td>
-          </tr>
-          <tr>
-            <td>Luana Braga</td>
-            <td>Auxiliar</td>
-            <td>Folha de Pagamento</td>
-            <td><div class="progress-bar"><div class="progress-inner" style="width: 54%;background:#f35b68"></div></div> 5,4</td>
-          </tr>
-        </table>
-        <div class="dashboard-graph">
-          [Gráfico de barras/radar interativo — exemplo visual]
-        </div>
-      </div>
-    </section>
-    <!-- DASHBOARD DE ENGAJAMENTO (invisible by default) -->
-    <section id="engajamento" style="display:none;">
-      <h2 style="font-size:1.41rem;font-weight:700;margin-bottom:8px;">Monitoramento de Engajamento</h2>
-      <p style="color:var(--gray); font-size:1.07rem;">
-        KPIs e evolução de consumo dos conteúdos, interações e engajamento por colaborador.
-      </p>
-      <div class="kpi-cards">
-        <div class="kpi-card">
-          <div class="kpi-label">Tempo total assistido</div>
-          <div class="kpi-value">19h 47min</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Top 3 mais ativos</div>
-          <div class="kpi-value">Maria, João, Luana</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Interações registro</div>
-          <div class="kpi-value">76</div>
-        </div>
-      </div>
-      <div class="dashboard-graph">
-        [Gráfico de evolução — exemplo visual]
-      </div>
-      <table class="knowledge-table" style="margin-top:32px;">
-        <tr>
-          <th>Colaborador</th>
-          <th>Tempo de vídeo</th>
-          <th>Interações</th>
-          <th>Assuntos mais buscados</th>
-        </tr>
-        <tr>
-          <td>Maria Rosa</td>
-          <td>7h 22m</td>
-          <td>31</td>
-          <td><span class="proc-status" style="background:#e1eaff;">SPED</span></td>
-        </tr>
-        <tr>
-          <td>João Silva</td>
-          <td>6h 54m</td>
-          <td>21</td>
-          <td><span class="proc-status" style="background:#d3f3ea;color:#18bfa6">Lucro Presumido</span></td>
-        </tr>
-        <tr>
-          <td>Luana Braga</td>
-          <td>5h 31m</td>
-          <td>15</td>
-          <td><span class="proc-status" style="background:#fce7e8;color:#f35b68">Folha Pgto</span></td>
-        </tr>
-      </table>
-    </section>
-  </main>
-</div>
-<script>
-  // Troca entre seções da landing page (menu lateral)
-  const links = document.querySelectorAll('.sidebar nav a');
-  const sections = ['biblioteca', 'mapa', 'engajamento'];
-  links.forEach((el, idx) => {
-    el.onclick = function(e) {
-      e.preventDefault();
-      links.forEach(i => i.classList.remove('active'));
-      this.classList.add('active');
-      sections.forEach(s =>{
-        document.getElementById(s).style.display = 'none';
-      });
-      document.getElementById(sections[idx]).style.display = '';
-    }
-  });
-</script>
-</body>
-</html>
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -544,15 +17,15 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; /* slate-50 */ }
         .sidebar-link.active { background-color: #eef2ff; color: #4338ca; font-weight: 600; }
         .sidebar-link.active i { color: #4f46e5; }
-        .view-content { animation: fadeIn 0.4s ease-in-out; }
+        .view-content, .modal-backdrop { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        /* Custom scrollbar for a polished look */
+        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #e2e8f0; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-        /* Estilos para Tabela Responsiva no Mapa de Conhecimentos */
+        /* Tabela Responsiva */
         @media screen and (max-width: 767px) {
             .responsive-map-table thead { display: none; }
             .responsive-map-table tr {
@@ -567,262 +40,72 @@
             .responsive-map-table td::before { content: attr(data-label); font-weight: 600; text-align: left; color: #475569; }
         }
         
-        /* Estilo para Notificação Toast */
+        /* Notificação Toast */
         #toast-notification {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            transform: translateX(200%);
-            transition: transform 0.5s ease-in-out;
-            z-index: 100;
+            position: fixed; bottom: 1.5rem; right: 1.5rem; transform: translateX(200%);
+            transition: transform 0.5s ease-in-out; z-index: 100;
         }
-        #toast-notification.show {
-            transform: translateX(0);
-        }
+        #toast-notification.show { transform: translateX(0); }
     </style>
 </head>
 <body class="antialiased text-slate-700">
 
     <div class="flex h-screen bg-slate-50">
-        <!-- Sidebar Lateral Fixa -->
-        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex-col flex-shrink-0 fixed lg:relative h-full lg:flex z-30 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex-col flex-shrink-0 fixed lg:relative h-full lg:flex z-40 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="px-6 py-5 flex items-center gap-3">
                 <i data-lucide="brain-circuit" class="text-indigo-600 h-8 w-8"></i>
                 <h1 class="text-2xl font-extrabold text-slate-800 tracking-tighter">KnowMap</h1>
             </div>
             <nav class="flex-1 px-4 py-4 space-y-2">
-                <a href="#" class="sidebar-link active flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="biblioteca">
-                    <i data-lucide="library" class="w-5 h-5"></i> Biblioteca
-                </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="mapa">
-                    <i data-lucide="map" class="w-5 h-5"></i> Mapa de Conhecimentos
-                </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="monitoramento">
-                    <i data-lucide="activity" class="w-5 h-5"></i> Monitoramento
-                </a>
+                <a href="#" class="sidebar-link active flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="biblioteca"><i data-lucide="library" class="w-5 h-5"></i> Biblioteca</a>
+                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="mapa"><i data-lucide="map" class="w-5 h-5"></i> Mapa de Conhecimentos</a>
+                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition" data-view="monitoramento"><i data-lucide="activity" class="w-5 h-5"></i> Monitoramento</a>
             </nav>
-            <div class="px-6 py-4 mt-auto">
-                <div class="p-4 bg-slate-100 rounded-lg text-center">
-                    <p class="text-sm font-semibold text-slate-700">Precisa de ajuda?</p>
-                    <p class="text-xs text-slate-500 mt-1">Contate o suporte para mais informações.</p>
-                </div>
-            </div>
         </aside>
 
         <!-- Conteúdo Principal -->
         <div class="flex-1 flex flex-col overflow-y-auto">
-            <!-- Header Fixo -->
-            <header class="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-slate-200 z-20">
+            <!-- Header -->
+            <header class="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-slate-200 z-30">
                 <div class="mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center justify-between h-16">
-                        <!-- Botão Hamburguer (Mobile) -->
-                        <button id="menu-toggle" class="lg:hidden text-slate-600 hover:text-slate-800">
-                            <i data-lucide="menu" class="w-6 h-6"></i>
-                        </button>
-                        <!-- Pesquisa Global -->
-                        <div class="relative">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                            <input id="globalSearchInput" type="text" placeholder="Buscar..." class="w-full sm:w-80 pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-                        </div>
-                        <!-- Avatar do Usuário -->
-                        <div class="flex items-center gap-4">
-                             <div class="flex items-center gap-2 text-sm">
-                                <span class="font-semibold text-slate-700 hidden md:inline">Jhonatan</span>
-                                <img src="https://placehold.co/40x40/eef2ff/4338ca?text=J" alt="Avatar do usuário" class="w-10 h-10 rounded-full border-2 border-indigo-200">
-                            </div>
-                        </div>
-                    </div>
+                    <div class="flex items-center justify-between h-16"><button id="menu-toggle" class="lg:hidden text-slate-600 hover:text-slate-800"><i data-lucide="menu" class="w-6 h-6"></i></button><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i><input id="globalSearchInput" type="text" placeholder="Buscar em toda a plataforma..." class="w-full sm:w-80 pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></div><div class="flex items-center gap-4"><div class="flex items-center gap-2 text-sm"><span class="font-semibold text-slate-700 hidden md:inline">Jhonatan</span><img src="https://placehold.co/40x40/eef2ff/4338ca?text=J" alt="Avatar do usuário" class="w-10 h-10 rounded-full border-2 border-indigo-200"></div></div></div>
                 </div>
             </header>
 
-            <!-- Área de Conteúdo Dinâmico -->
+            <!-- Conteúdo Dinâmico -->
             <main class="flex-1 p-4 sm:p-6 lg:p-8">
-                <!-- VIEW 1: Biblioteca de Procedimentos (Default) -->
-                <div id="view-biblioteca" class="view-content">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-slate-800">Biblioteca de Procedimentos</h2>
-                        <p class="text-slate-500 mt-1">Acesse treinamentos, guias e materiais de apoio.</p>
-                    </div>
-                    <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        <!-- Card de Procedimento -->
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="bg-indigo-100 p-3 rounded-lg"><i data-lucide="landmark" class="text-indigo-600"></i></div>
-                                <h3 class="font-semibold text-slate-800">Apuração Lucro Presumido</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mb-4">Guia completo sobre a apuração, cálculo de impostos e obrigações acessórias.</p>
-                            <div class="flex items-center justify-between text-xs">
-                                <span class="font-semibold text-slate-600">Seu Progresso:</span>
-                                <span class="px-2 py-1 font-semibold text-emerald-800 bg-emerald-100 rounded-full">Concluído</span>
-                            </div>
-                        </div>
-                         <!-- Card de Procedimento -->
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="bg-sky-100 p-3 rounded-lg"><i data-lucide="file-text" class="text-sky-600"></i></div>
-                                <h3 class="font-semibold text-slate-800">SPED Fiscal</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mb-4">Entenda a estrutura do arquivo, validação e entrega desta obrigação acessória.</p>
-                            <div class="flex items-center justify-between text-xs">
-                                <span class="font-semibold text-slate-600">Seu Progresso:</span>
-                                <span class="px-2 py-1 font-semibold text-amber-800 bg-amber-100 rounded-full">Em Andamento</span>
-                            </div>
-                        </div>
-                        <!-- Card de Procedimento -->
-                         <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="bg-rose-100 p-3 rounded-lg"><i data-lucide="users" class="text-rose-600"></i></div>
-                                <h3 class="font-semibold text-slate-800">Folha de Pagamento</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mb-4">Processos de admissão, cálculo de folha, férias, 13º e rescisão contratual.</p>
-                            <div class="flex items-center justify-between text-xs">
-                                <span class="font-semibold text-slate-600">Seu Progresso:</span>
-                                <span class="px-2 py-1 font-semibold text-slate-800 bg-slate-200 rounded-full">Não Iniciado</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VIEW 2: Mapa de Conhecimentos -->
-                <div id="view-mapa" class="view-content hidden">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
-                        <div>
-                            <h2 class="text-2xl font-bold text-slate-800">Mapa de Conhecimentos da Equipe</h2>
-                            <p class="text-slate-500 mt-1">Visualize e compare o nível de domínio da sua equipe.</p>
-                        </div>
-                        <button id="addKnowledgeBtn" class="flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700 transition duration-300 ease-in-out">
-                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                            Adicionar Registro
-                        </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-                         <!-- Filtros -->
-                        <div class="lg:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="filter" class="w-5 h-5"></i> Filtros e Ações</h3>
-                            <div class="space-y-4">
-                                <div><label for="collaboratorFilter" class="block mb-1 text-sm font-medium text-slate-600">Colaborador</label><select id="collaboratorFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div>
-                                <div><label for="topicFilter" class="block mb-1 text-sm font-medium text-slate-600">Tema</label><select id="topicFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div>
-                                <div><label for="chartTypeSelector" class="block mb-1 text-sm font-medium text-slate-600">Gráfico</label><select id="chartTypeSelector" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"><option value="bar">Barras</option><option value="radar">Radar</option><option value="doughnut">Rosca</option></select></div>
-                                <hr class="my-2 border-slate-200">
-                                <div class="flex gap-3"><button id="exportCsvBtn" title="Exportar para CSV" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i></button><button id="exportXlsxBtn" title="Exportar para Excel" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i></button></div>
-                            </div>
-                        </div>
-                        <!-- KPIs -->
-                        <div class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-indigo-100 p-3 rounded-full flex-shrink-0"><i data-lucide="bar-chart-big" class="text-indigo-600"></i></div><p class="text-sm text-slate-500">Média Geral</p></div><div class="mt-auto pt-4"><p id="kpiAvgValue" class="text-2xl font-bold text-slate-800">0.0</p></div></div>
-                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-emerald-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-up" class="text-emerald-600"></i></div><p class="text-sm text-slate-500">Tema mais Forte</p></div><div class="mt-auto pt-4"><p id="kpiStrongestValue" class="text-lg font-bold text-slate-800 break-words">N/A</p></div></div>
-                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-rose-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-down" class="text-rose-600"></i></div><p class="text-sm text-slate-500">Ponto de Atenção</p></div><div class="mt-auto pt-4"><p id="kpiWeakestValue" class="text-lg font-bold text-slate-800 break-words">N/A</p></div></div>
-                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-sky-100 p-3 rounded-full flex-shrink-0"><i data-lucide="users" class="text-sky-600"></i></div><p class="text-sm text-slate-500">Colaboradores</p></div><div class="mt-auto pt-4"><p id="kpiTotalValue" class="text-2xl font-bold text-slate-800">0</p></div></div>
-                        </div>
-                    </div>
-                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6"><div class="overflow-x-auto"><table class="responsive-map-table w-full text-sm text-left text-slate-500"><thead class="text-xs text-slate-700 uppercase bg-slate-50"></thead><tbody id="knowledgeTableBody" class="divide-y divide-slate-200 md:divide-y-0"></tbody></table></div></div>
-                        <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 id="chartTitle" class="font-semibold text-slate-800 mb-4">Análise Visual</h3><div class="h-80"><canvas id="knowledgeChart"></canvas></div></div>
-                     </div>
-                </div>
-
-                <!-- VIEW 3: Monitoramento de Engajamento -->
-                <div id="view-monitoramento" class="view-content hidden">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-slate-800">Monitoramento de Engajamento</h2>
-                        <p class="text-slate-500 mt-1">Acompanhe a evolução e participação da equipe.</p>
-                    </div>
-                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Tempo total assistido</p><p class="text-3xl font-bold text-slate-800">128 <span class="text-lg font-medium text-slate-500">horas</span></p></div>
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Treinamentos Concluídos</p><p class="text-3xl font-bold text-slate-800">32</p></div>
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Colaborador mais ativo</p><p class="text-xl font-bold text-slate-800">Maria (Contadora)</p></div>
-                     </div>
-                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="font-semibold text-slate-800 mb-4">Evolução de Engajamento (Últimos 30 dias)</h3>
-                            <div class="h-80"><canvas id="engagementChart"></canvas></div>
-                        </div>
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="font-semibold text-slate-800 mb-4">Registro de Interações</h3>
-                            <div class="overflow-y-auto h-80">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="text-xs text-slate-500 uppercase sticky top-0 bg-white">
-                                        <tr><th class="py-2">De</th><th class="py-2">Para</th><th class="py-2">Assunto</th></tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-100">
-                                        <tr><td class="py-3"><div class="font-medium text-slate-800">João</div><div class="text-xs text-slate-500">Estagiário</div></td><td class="py-3"><div class="font-medium text-slate-800">Jhonatan</div><div class="text-xs text-slate-500">Analista Fiscal</div></td><td class="py-3"><div class="text-slate-600">Dúvida sobre SPED</div><div class="text-xs text-slate-400">03/09/2025</div></td></tr>
-                                        <tr><td class="py-3"><div class="font-medium text-slate-800">Ana</div><div class="text-xs text-slate-500">Estagiária</div></td><td class="py-3"><div class="font-medium text-slate-800">Ryan</div><div class="text-xs text-slate-500">Analista Fiscal</div></td><td class="py-3"><div class="text-slate-600">Retenções Federais</div><div class="text-xs text-slate-400">02/09/2025</div></td></tr>
-                                        <tr><td class="py-3"><div class="font-medium text-slate-800">Carlos</div><div class="text-xs text-slate-500">Analista Fiscal</div></td><td class="py-3"><div class="font-medium text-slate-800">Laura</div><div class="text-xs text-slate-500">Gerente Contábil</div></td><td class="py-3"><div class="text-slate-600">Planejamento Tribut.</div><div class="text-xs text-slate-400">01/09/2025</div></td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                     </div>
-                </div>
+                <!-- VIEW 1: Biblioteca -->
+                <div id="view-biblioteca" class="view-content"><div class="mb-6"><h2 class="text-2xl font-bold text-slate-800">Biblioteca de Procedimentos</h2><p class="text-slate-500 mt-1">Acesse treinamentos, guias e materiais de apoio.</p></div><div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div></div>
+                <!-- VIEW 2: Mapa -->
+                <div id="view-mapa" class="view-content hidden"><div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4"><div><h2 class="text-2xl font-bold text-slate-800">Mapa de Conhecimentos da Equipe</h2><p class="text-slate-500 mt-1">Visualize e compare o nível de domínio da sua equipe.</p></div><button id="addKnowledgeBtn" class="flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700 transition"><i data-lucide="plus-circle" class="w-5 h-5"></i> Adicionar Registro</button></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6"><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-indigo-100 p-3 rounded-full flex-shrink-0"><i data-lucide="bar-chart-big" class="text-indigo-600"></i></div><p class="text-sm text-slate-500">Média Geral</p></div><div class="mt-auto pt-4"><p id="kpiAvgValue" class="text-3xl font-bold text-slate-800">0.0</p></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-emerald-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-up" class="text-emerald-600"></i></div><p class="text-sm text-slate-500">Tema mais Forte</p></div><div class="mt-auto pt-4"><p id="kpiStrongestValue" class="text-xl font-bold text-slate-800 break-words">N/A</p></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-rose-100 p-3 rounded-full flex-shrink-0"><i data-lucide="trending-down" class="text-rose-600"></i></div><p class="text-sm text-slate-500">Ponto de Atenção</p></div><div class="mt-auto pt-4"><p id="kpiWeakestValue" class="text-xl font-bold text-slate-800 break-words">N/A</p></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full"><div class="flex items-center gap-4"><div class="bg-sky-100 p-3 rounded-full flex-shrink-0"><i data-lucide="users" class="text-sky-600"></i></div><p class="text-sm text-slate-500">Colaboradores</p></div><div class="mt-auto pt-4"><p id="kpiTotalValue" class="text-3xl font-bold text-slate-800">0</p></div></div></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6"><h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2 text-base"><i data-lucide="filter" class="w-5 h-5"></i> Filtros e Ações</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end"><div><label for="collaboratorFilter" class="block mb-1 text-sm font-medium text-slate-600">Colaborador</label><select id="collaboratorFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div><div><label for="topicFilter" class="block mb-1 text-sm font-medium text-slate-600">Tema</label><select id="topicFilter" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"></select></div><div><label for="chartTypeSelector" class="block mb-1 text-sm font-medium text-slate-600">Gráfico</label><select id="chartTypeSelector" class="w-full bg-slate-50 border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 transition"><option value="bar">Barras</option><option value="radar">Radar</option><option value="doughnut">Rosca</option></select></div><div class="flex gap-3"><button id="exportCsvBtn" title="Exportar para CSV" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i> CSV</button><button id="exportXlsxBtn" title="Exportar para Excel" class="w-full flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i> Excel</button></div></div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6"><h3 class="text-lg font-semibold text-slate-800 mb-4">Registros Detalhados</h3><div class="overflow-x-auto"><table class="responsive-map-table w-full text-sm text-left text-slate-500"><thead class="text-xs text-slate-700 uppercase bg-slate-50"></thead><tbody id="knowledgeTableBody" class="divide-y divide-slate-200 md:divide-y-0"></tbody></table></div></div><div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 id="chartTitle" class="font-semibold text-slate-800 mb-4">Análise Visual</h3><div class="h-80"><canvas id="knowledgeChart"></canvas></div></div></div></div>
+                <!-- VIEW 3: Monitoramento -->
+                <div id="view-monitoramento" class="view-content hidden"><div class="mb-6"><h2 class="text-2xl font-bold text-slate-800">Monitoramento de Engajamento</h2><p class="text-slate-500 mt-1">Acompanhe a evolução, participação e destaques da equipe.</p></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Tempo total em treinamento</p><p class="text-3xl font-bold text-slate-800">128 <span class="text-lg font-medium text-slate-500">horas</span></p></div><div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><p class="text-sm text-slate-500 mb-2">Treinamentos Concluídos</p><p class="text-3xl font-bold text-slate-800">32</p></div><div id="top-performer-kpi" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"></div></div><div class="grid grid-cols-1 lg:grid-cols-5 gap-6"><div class="lg:col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 class="font-semibold text-slate-800 mb-4">Evolução de Engajamento (Últimos 30 dias)</h3><div class="h-80"><canvas id="engagementChart"></canvas></div></div><div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6"><h3 class="font-semibold text-slate-800 mb-4">Ranking de Colaboradores</h3><div id="ranking-list" class="overflow-y-auto h-80"></div></div></div></div>
             </main>
         </div>
     </div>
 
-    <!-- Modal de Adicionar Conhecimento -->
-    <div id="knowledgeModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300 z-50">
-        <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl transition-transform duration-300 transform scale-95">
-            <form id="knowledgeForm">
-                <input type="hidden" id="editId">
-                <h2 id="modalTitle" class="text-2xl font-bold mb-6 text-slate-900">Adicionar Registro</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="mb-4"><label for="name" class="block mb-2 text-sm font-medium text-slate-700">Colaborador</label><input type="text" id="name" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
-                    <div class="mb-4"><label for="role" class="block mb-2 text-sm font-medium text-slate-700">Cargo</label><input type="text" id="role" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
-                    <div class="mb-4 md:col-span-2"><label for="topic" class="block mb-2 text-sm font-medium text-slate-700">Tema</label><input type="text" id="topic" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
-                    <div class="mb-4"><label for="priority" class="block mb-2 text-sm font-medium text-slate-700">Prioridade</label><select id="priority" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required><option value="Alta">Alta</option><option value="Média">Média</option><option value="Baixa">Baixa</option></select></div>
-                    <div class="mb-4"><label for="evaluationDate" class="block mb-2 text-sm font-medium text-slate-700">Avaliação</label><input type="date" id="evaluationDate" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div>
-                    <div class="mb-6 md:col-span-2"><label for="level" class="block mb-2 text-sm font-medium text-slate-700">Nível (<span id="levelValue" class="font-bold text-indigo-600">5</span>)</label><input type="range" id="level" min="0" max="10" value="5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"></div>
-                </div>
-                <div class="flex justify-end gap-4 mt-2">
-                    <button type="button" id="cancelBtn" class="py-2 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition">Cancelar</button>
-                    <button type="submit" id="saveBtn" class="py-2.5 px-5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modal Adicionar/Editar Conhecimento -->
+    <div id="knowledgeModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300 z-50"><div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl transition-transform duration-300 transform scale-95"><form id="knowledgeForm"><input type="hidden" id="editId"><h2 id="modalTitle" class="text-2xl font-bold mb-6 text-slate-900"></h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="mb-4"><label for="name" class="block mb-2 text-sm font-medium text-slate-700">Colaborador</label><input type="text" id="name" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div><div class="mb-4"><label for="role" class="block mb-2 text-sm font-medium text-slate-700">Cargo</label><input type="text" id="role" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div><div class="mb-4 md:col-span-2"><label for="topic" class="block mb-2 text-sm font-medium text-slate-700">Tema</label><input type="text" id="topic" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div><div class="mb-4"><label for="priority" class="block mb-2 text-sm font-medium text-slate-700">Prioridade</label><select id="priority" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required><option value="Alta">Alta</option><option value="Média">Média</option><option value="Baixa">Baixa</option></select></div><div class="mb-4"><label for="evaluationDate" class="block mb-2 text-sm font-medium text-slate-700">Avaliação</label><input type="date" id="evaluationDate" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 transition" required></div><div class="mb-6 md:col-span-2"><label for="level" class="block mb-2 text-sm font-medium text-slate-700">Nível (<span id="levelValue" class="font-bold text-indigo-600">5</span>)</label><input type="range" id="level" min="0" max="10" value="5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"></div></div><div class="flex justify-end gap-4 mt-2"><button type="button" class="btn-cancel py-2 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition">Cancelar</button><button type="submit" id="saveBtn" class="py-2.5 px-5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Salvar</button></div></form></div></div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300 z-50"><div class="bg-white w-full max-w-md p-6 rounded-xl shadow-2xl transition-transform duration-300 transform scale-95"><h2 class="text-lg font-bold text-slate-900">Confirmar Ação</h2><p class="mt-2 text-sm text-slate-600">Você tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.</p><div class="mt-6 flex justify-end gap-4"><button type="button" class="btn-cancel py-2 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition">Cancelar</button><button type="button" id="confirmDeleteBtn" class="py-2 px-4 bg-rose-600 text-white font-semibold rounded-lg hover:bg-rose-700 transition">Excluir</button></div></div></div>
+    
+    <!-- Modal Detalhes da Biblioteca -->
+    <div id="libraryDetailModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300 z-50"><div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl transition-transform duration-300 transform scale-95 max-h-[90vh] flex flex-col"><div class="flex justify-between items-center mb-4"><h2 id="libraryModalTitle" class="text-2xl font-bold text-slate-900"></h2><button class="btn-cancel text-slate-500 hover:text-slate-800">&times;</button></div><div class="flex-1 overflow-y-auto"><div class="aspect-w-16 aspect-h-9 bg-slate-200 rounded-lg mb-4 flex items-center justify-center"><i data-lucide="play-circle" class="w-16 h-16 text-slate-400"></i></div><h3 class="font-semibold text-lg mb-2">Guia Rápido</h3><p class="text-slate-600 text-sm">Este é um guia detalhado sobre o procedimento. Siga os passos abaixo para concluir o treinamento. Em breve, esta área conterá textos explicativos, passo-a-passo e um quiz interativo para validar seu conhecimento.</p></div></div></div>
 
     <!-- Notificação Toast -->
-    <div id="toast-notification" class="bg-slate-800 text-white py-3 px-5 rounded-lg shadow-xl">
-        <p id="toast-message"></p>
-    </div>
+    <div id="toast-notification" class="bg-slate-800 text-white py-3 px-5 rounded-lg shadow-xl"><p id="toast-message"></p></div>
     
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- LÓGICA DE NAVEGAÇÃO PRINCIPAL ---
-        const sidebarLinks = document.querySelectorAll('.sidebar-link');
-        const views = document.querySelectorAll('.view-content');
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
-
-        let isMapInitialized = false;
-        let isMonitoringInitialized = false;
-
-        const switchView = (viewId) => {
-            views.forEach(view => view.classList.add('hidden'));
-            const activeView = document.getElementById(`view-${viewId}`);
-            if (activeView) activeView.classList.remove('hidden');
-            
-            sidebarLinks.forEach(link => link.classList.toggle('active', link.dataset.view === viewId));
-            
-            if (window.innerWidth < 1024) sidebar.classList.add('-translate-x-full');
-
-            if (viewId === 'mapa' && !isMapInitialized) {
-                initMapFunctions();
-                isMapInitialized = true;
-            } else if (viewId === 'monitoramento' && !isMonitoringInitialized) {
-                setupEngagementChart();
-                isMonitoringInitialized = true;
-            }
-        };
-
-        sidebarLinks.forEach(link => link.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchView(e.currentTarget.dataset.view);
-        }));
-
-        menuToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
-
-        // --- LÓGICA ESPECÍFICA DO MAPA DE CONHECIMENTOS ---
+        // --- DADOS INICIAIS ---
+        let libraryProcedures = [
+            { title: 'Apuração Lucro Presumido', icon: 'landmark', color: 'indigo', status: 'Concluído' },
+            { title: 'SPED Fiscal', icon: 'file-text', color: 'sky', status: 'Em Andamento' },
+            { title: 'Folha de Pagamento', icon: 'users', color: 'rose', status: 'Não Iniciado' },
+            { title: 'Retenções Federais', icon: 'receipt', color: 'amber', status: 'Não Iniciado' },
+        ];
         let knowledgeData = [
             { id: 1, name: 'Jhonatan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 10, priority: 'Alta', evaluationDate: '2025-08-20' },
             { id: 2, name: 'Ryan', role: 'Analista Fiscal', topic: 'Apuração Lucro Presumido', level: 9, priority: 'Alta', evaluationDate: '2025-08-20' },
@@ -836,184 +119,269 @@
             { id: 10, name: 'Ryan', role: 'Analista Fiscal', topic: 'Retenções Federais', level: 5, priority: 'Média', evaluationDate: '2025-08-17' },
         ];
         
+        // --- ELEMENTOS GLOBAIS ---
+        const modals = document.querySelectorAll('.fixed.inset-0');
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        // --- LÓGICA DE NAVEGAÇÃO E INICIALIZAÇÃO ---
+        let isMapInitialized = false, isMonitoringInitialized = false;
+        const switchView = (viewId) => {
+            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            sidebarLinks.forEach(l => l.classList.toggle('active', l.dataset.view === viewId));
+            if (window.innerWidth < 1024) document.getElementById('sidebar').classList.add('-translate-x-full');
+
+            if (viewId === 'mapa' && !isMapInitialized) { initMapModule(); isMapInitialized = true; }
+            if (viewId === 'monitoramento' && !isMonitoringInitialized) { initMonitoringModule(); isMonitoringInitialized = true; }
+        };
+        
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchView(e.currentTarget.dataset.view);
+            });
+        });
+
+        const openModal = (modal) => {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 10);
+        };
+        const closeModal = (modal) => {
+            modal.classList.add('opacity-0');
+            modal.querySelector('.transform').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+        
+        modals.forEach(modal => {
+            modal.addEventListener('click', e => {
+                if (e.target === modal || e.target.closest('.btn-cancel')) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // --- MÓDULO: BIBLIOTECA ---
+        const libraryGrid = document.getElementById('library-grid');
+        const libraryDetailModal = document.getElementById('libraryDetailModal');
+        const renderLibrary = () => {
+            const statusStyles = {
+                'Concluído': 'text-emerald-800 bg-emerald-100',
+                'Em Andamento': 'text-amber-800 bg-amber-100',
+                'Não Iniciado': 'text-slate-800 bg-slate-200',
+            };
+            const colorStyles = { 'indigo': 'bg-indigo-100 text-indigo-600', 'sky': 'bg-sky-100 text-sky-600', 'rose': 'bg-rose-100 text-rose-600', 'amber': 'bg-amber-100 text-amber-600' };
+            
+            libraryGrid.innerHTML = libraryProcedures.map(p => `
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer library-card" data-title="${p.title}">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="p-3 rounded-lg ${colorStyles[p.color]}"><i data-lucide="${p.icon}"></i></div>
+                        <h3 class="font-semibold text-slate-800">${p.title}</h3>
+                    </div>
+                    <div class="flex items-center justify-between text-xs"><span class="font-semibold text-slate-600">Seu Progresso:</span><span class="px-2 py-1 font-semibold rounded-full ${statusStyles[p.status]}">${p.status}</span></div>
+                </div>`).join('');
+            lucide.createIcons();
+        };
+        libraryGrid.addEventListener('click', e => {
+            const card = e.target.closest('.library-card');
+            if(card) {
+                document.getElementById('libraryModalTitle').textContent = card.dataset.title;
+                openModal(libraryDetailModal);
+            }
+        });
+
+        // --- MÓDULO: MAPA DE CONHECIMENTOS ---
         let knowledgeChart = null;
         let currentFilters = { collaborator: 'all', topic: 'all', chartType: 'bar' };
-        
-        const getLevelTag = (level) => {
-            const levelValue = parseInt(level, 10);
-            let color = 'bg-slate-100 text-slate-700'; let text = 'Iniciante';
-            if (levelValue >= 4) { color = 'bg-sky-100 text-sky-700'; text = 'Básico'; }
-            if (levelValue >= 6) { color = 'bg-amber-100 text-amber-700'; text = 'Intermediário'; }
-            if (levelValue >= 8) { color = 'bg-emerald-100 text-emerald-700'; text = 'Avançado'; }
-            if (levelValue === 10) { color = 'bg-indigo-100 text-indigo-700'; text = 'Especialista'; }
-            return `<div class="flex items-center gap-2 justify-end md:justify-start"><span class="px-2 py-1 text-xs font-semibold rounded-full ${color}">${text}</span><span class="font-bold text-sm text-slate-600 w-6 text-center">${levelValue}</span></div>`;
+        const knowledgeModal = document.getElementById('knowledgeModal'), knowledgeForm = document.getElementById('knowledgeForm');
+        const confirmModal = document.getElementById('confirmModal');
+        let deleteId = null;
+
+        const getLevelDisplay = (level) => {
+            const colors = level >= 8 ? 'bg-emerald-500' : level >= 5 ? 'bg-amber-500' : 'bg-rose-500';
+            return `
+                <div class="flex items-center gap-3">
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div class="${colors}" style="width: ${level * 10}%"></div>
+                    </div>
+                    <span class="font-bold text-sm text-slate-700 w-6 text-right">${level}</span>
+                </div>
+            `;
         };
-        const getPriorityTag = (priority) => {
-            const colors = { 'Alta': 'bg-rose-100 text-rose-700', 'Média': 'bg-amber-100 text-amber-700', 'Baixa': 'bg-sky-100 text-sky-700' };
-            return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${colors[priority] || ''}">${priority}</span>`;
-        };
-        const formatDate = (dateString) => new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR');
 
         const renderTable = (data) => {
-            const tableBody = document.getElementById('knowledgeTableBody');
-            const tableHead = tableBody.previousElementSibling;
-            tableHead.innerHTML = `<tr><th class="px-6 py-3">Colaborador</th><th class="px-6 py-3">Tema</th><th class="px-6 py-3">Nível</th><th class="px-6 py-3">Ações</th></tr>`;
-            tableBody.innerHTML = !data.length ? `<tr><td colspan="4" class="text-center p-8 text-slate-500">Nenhum registro encontrado.</td></tr>` : '';
-
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-6 py-4" data-label="Colaborador">
-                        <div class="flex items-center gap-2">
-                            <div class="font-medium text-slate-900">${item.name}</div>
-                            <button class="send-btn text-slate-400 hover:text-indigo-600 transition" title="Enviar para ${item.name}" data-name="${item.name}"><i data-lucide="send" class="w-4 h-4"></i></button>
-                        </div>
-                        <div class="text-xs text-slate-500">${item.role}</div>
-                    </td>
+            const tbody = document.getElementById('knowledgeTableBody'), thead = tbody.previousElementSibling;
+            thead.innerHTML = `<tr><th class="px-6 py-3">Colaborador</th><th class="px-6 py-3">Tema</th><th class="px-6 py-3 w-48">Nível</th><th class="px-6 py-3">Ações</th></tr>`;
+            tbody.innerHTML = data.length ? data.map(item => `
+                <tr>
+                    <td class="px-6 py-4" data-label="Colaborador"><div class="flex items-center gap-2"><div class="font-medium text-slate-900">${item.name}</div><button class="send-btn text-slate-400 hover:text-indigo-600 transition" title="Enviar para ${item.name}" data-name="${item.name}"><i data-lucide="send" class="w-4 h-4"></i></button></div><div class="text-xs text-slate-500">${item.role}</div></td>
                     <td class="px-6 py-4" data-label="Tema">${item.topic}</td>
-                    <td class="px-6 py-4" data-label="Nível">${getLevelTag(item.level)}</td>
-                    <td class="px-6 py-4" data-label="Ações">
-                        <div class="flex gap-3 justify-end md:justify-start">
-                            <button class="edit-btn p-1 text-indigo-600 hover:text-indigo-800 transition" data-id="${item.id}" title="Editar"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
-                            <button class="delete-btn p-1 text-rose-600 hover:text-rose-800 transition" data-id="${item.id}" title="Excluir"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                        </div>
-                    </td>`;
-                tableBody.appendChild(row);
-            });
+                    <td class="px-6 py-4" data-label="Nível">${getLevelDisplay(item.level)}</td>
+                    <td class="px-6 py-4" data-label="Ações"><div class="flex gap-3 justify-end md:justify-start"><button class="edit-btn p-1 text-indigo-600 hover:text-indigo-800 transition" data-id="${item.id}" title="Editar"><i data-lucide="edit-3" class="w-5 h-5"></i></button><button class="delete-btn p-1 text-rose-600 hover:text-rose-800 transition" data-id="${item.id}" title="Excluir"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div></td>
+                </tr>`).join('') : `<tr><td colspan="4" class="text-center p-8 text-slate-500">Nenhum registro encontrado.</td></tr>`;
             lucide.createIcons();
         };
 
         const updateKpiCards = (data) => {
-            document.getElementById('kpiAvgValue').textContent = data.length ? (data.reduce((sum, item) => sum + item.level, 0) / data.length).toFixed(1) : '0.0';
-            document.getElementById('kpiTotalValue').textContent = [...new Set(data.map(item => item.name))].length;
+            document.getElementById('kpiAvgValue').textContent = data.length ? (data.reduce((s, i) => s + i.level, 0) / data.length).toFixed(1) : '0.0';
+            document.getElementById('kpiTotalValue').textContent = [...new Set(data.map(i => i.name))].length;
             if (data.length) {
-                const topics = data.reduce((acc, item) => {
-                    if (!acc[item.topic]) acc[item.topic] = { sum: 0, count: 0 };
-                    acc[item.topic].sum += item.level; acc[item.topic].count++;
-                    return acc;
-                }, {});
-                let strongest = { topic: 'N/A', avg: -1 }; let weakest = { topic: 'N/A', avg: 11 };
-                Object.entries(topics).forEach(([topic, { sum, count }]) => {
-                    const avg = sum / count;
-                    if (avg > strongest.avg) strongest = { topic, avg };
-                    if (avg < weakest.avg) weakest = { topic, avg };
-                });
-                document.getElementById('kpiStrongestValue').textContent = strongest.topic;
-                document.getElementById('kpiWeakestValue').textContent = weakest.topic;
-            } else {
-                document.getElementById('kpiStrongestValue').textContent = 'N/A';
-                document.getElementById('kpiWeakestValue').textContent = 'N/A';
-            }
+                const topics = data.reduce((a, i) => ({...a, [i.topic]: {s:(a[i.topic]?.s||0)+i.level, c:(a[i.topic]?.c||0)+1}}), {});
+                const topicAvgs = Object.entries(topics).map(([t, {s, c}]) => ({topic: t, avg: s/c}));
+                document.getElementById('kpiStrongestValue').textContent = topicAvgs.reduce((a, b) => a.avg > b.avg ? a : b).topic;
+                document.getElementById('kpiWeakestValue').textContent = topicAvgs.reduce((a, b) => a.avg < b.avg ? a : b).topic;
+            } else { ['kpiStrongestValue', 'kpiWeakestValue'].forEach(id => document.getElementById(id).textContent = 'N/A'); }
         };
 
         const updateChart = (data, type) => {
-            const chartCanvas = document.getElementById('knowledgeChart');
+            const ctx = document.getElementById('knowledgeChart').getContext('2d');
             if (knowledgeChart) knowledgeChart.destroy();
-            if (!chartCanvas || !data.length) return;
-
-            const isCollaboratorView = currentFilters.collaborator !== 'all';
-            const labels = isCollaboratorView ? data.map(item => item.topic) : data.map(item => item.name);
-            const title = isCollaboratorView ? `Desempenho de ${currentFilters.collaborator}` : `Comparativo por ${currentFilters.topic === 'all' ? 'Conhecimento' : 'Colaborador'}`;
-            document.getElementById('chartTitle').textContent = title;
-
-            const chartData = {
-                labels,
-                datasets: [{
-                    label: 'Nível', data: data.map(item => item.level),
-                    backgroundColor: 'rgba(79, 70, 229, 0.7)', borderColor: 'rgba(79, 70, 229, 1)',
-                    borderWidth: 1, pointBackgroundColor: 'rgba(79, 70, 229, 1)'
-                }]
-            };
-
-            knowledgeChart = new Chart(chartCanvas.getContext('2d'), {
-                type, data: chartData,
-                options: { responsive: true, maintainAspectRatio: false, scales: type !== 'radar' ? { y: { beginAtZero: true, max: 10 } } : { r: { beginAtZero: true, max: 10 } }, plugins: { legend: { display: false } } }
+            if (!ctx || !data.length) {
+                return;
+            }
+            const isCollabView = currentFilters.collaborator !== 'all';
+            document.getElementById('chartTitle').textContent = isCollabView ? `Desempenho de ${currentFilters.collaborator}` : `Comparativo por Tema: ${currentFilters.topic === 'all' ? 'Geral' : currentFilters.topic}`;
+            knowledgeChart = new Chart(ctx, { type,
+                data: { labels: data.map(i => isCollabView ? i.topic : i.name), datasets: [{ label: 'Nível', data: data.map(i => i.level), backgroundColor: 'rgba(79, 70, 229, 0.7)', borderColor: 'rgba(79, 70, 229, 1)' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: type!=='radar'?{y:{beginAtZero:true, max:10}}:{r:{beginAtZero:true, max:10}}, plugins: { legend: { display: false } } }
             });
         };
         
         const populateFilters = () => {
-            const collaboratorFilter = document.getElementById('collaboratorFilter');
-            const topicFilter = document.getElementById('topicFilter');
-            const collaborators = ['Todos', ...new Set(knowledgeData.map(item => item.name))];
-            const topics = ['Todos', ...new Set(knowledgeData.map(item => item.topic))];
-            collaboratorFilter.innerHTML = collaborators.map(c => `<option value="${c === 'Todos' ? 'all' : c}">${c}</option>`).join('');
-            topicFilter.innerHTML = topics.map(t => `<option value="${t === 'Todos' ? 'all' : t}">${t}</option>`).join('');
+            ['collaboratorFilter', 'topicFilter'].forEach(id => {
+                const el = document.getElementById(id), key = id.includes('collab') ? 'name' : 'topic';
+                const items = ['Todos', ...new Set(knowledgeData.map(i => i[key]).sort())];
+                el.innerHTML = items.map(i => `<option value="${i==='Todos'?'all':i}">${i}</option>`).join('');
+                el.value = currentFilters[key];
+            });
         };
 
         const applyFiltersAndRender = () => {
-            let filteredData = [...knowledgeData];
-            if (currentFilters.collaborator !== 'all') {
-                filteredData = filteredData.filter(item => item.name === currentFilters.collaborator);
-            }
-            if (currentFilters.topic !== 'all') {
-                filteredData = filteredData.filter(item => item.topic === currentFilters.topic);
-            }
-            renderTable(filteredData);
-            updateKpiCards(filteredData);
-            updateChart(filteredData, currentFilters.chartType);
+            let data = knowledgeData.filter(i => (currentFilters.collaborator==='all' || i.name===currentFilters.collaborator) && (currentFilters.topic==='all' || i.topic===currentFilters.topic));
+            renderTable(data); updateKpiCards(data); updateChart(data, currentFilters.chartType);
         };
-
-        const showToast = (message) => {
-            const toast = document.getElementById('toast-notification');
-            const msgEl = document.getElementById('toast-message');
-            msgEl.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        };
-
-        const initMapFunctions = () => {
+        
+        const handleFormSubmit = (e) => {
+            e.preventDefault();
+            const id = parseInt(knowledgeForm.querySelector('#editId').value);
+            const record = { 
+                name: knowledgeForm.elements.name.value, 
+                role: knowledgeForm.elements.role.value, 
+                topic: knowledgeForm.elements.topic.value, 
+                level: parseInt(knowledgeForm.elements.level.value), 
+                priority: knowledgeForm.elements.priority.value, 
+                evaluationDate: knowledgeForm.elements.evaluationDate.value 
+            };
+            if (id) {
+                knowledgeData = knowledgeData.map(i => i.id === id ? { ...i, ...record } : i);
+                showToast('Registro atualizado com sucesso!');
+            } else {
+                knowledgeData.push({ ...record, id: Date.now() });
+                showToast('Novo registro adicionado!');
+            }
+            closeModal(knowledgeModal);
             populateFilters();
             applyFiltersAndRender();
+        };
 
-            document.getElementById('collaboratorFilter').addEventListener('change', (e) => {
-                currentFilters.collaborator = e.target.value;
-                if (currentFilters.collaborator !== 'all') {
-                   document.getElementById('chartTypeSelector').value = 'radar';
-                   currentFilters.chartType = 'radar';
+        const initMapModule = () => {
+            populateFilters(); applyFiltersAndRender();
+            document.getElementById('addKnowledgeBtn').addEventListener('click', () => {
+                knowledgeForm.reset(); document.getElementById('editId').value = '';
+                document.getElementById('modalTitle').textContent = 'Adicionar Novo Registro';
+                document.getElementById('levelValue').textContent = 5;
+                knowledgeForm.elements.evaluationDate.value = new Date().toISOString().split('T')[0];
+                openModal(knowledgeModal);
+            });
+            document.getElementById('knowledgeTableBody').addEventListener('click', e => {
+                const editBtn = e.target.closest('.edit-btn'), deleteBtn = e.target.closest('.delete-btn'), sendBtn = e.target.closest('.send-btn');
+                if (editBtn) {
+                    const item = knowledgeData.find(i => i.id === parseInt(editBtn.dataset.id));
+                    Object.keys(item).forEach(k => { if(knowledgeForm.elements[k]) knowledgeForm.elements[k].value = item[k]; });
+                    document.getElementById('editId').value = item.id;
+                    document.getElementById('levelValue').textContent = item.level;
+                    document.getElementById('modalTitle').textContent = 'Editar Registro';
+                    openModal(knowledgeModal);
                 }
-                applyFiltersAndRender();
-            });
-            document.getElementById('topicFilter').addEventListener('change', (e) => {
-                currentFilters.topic = e.target.value;
-                applyFiltersAndRender();
-            });
-            document.getElementById('chartTypeSelector').addEventListener('change', (e) => {
-                currentFilters.chartType = e.target.value;
-                applyFiltersAndRender();
-            });
-            document.getElementById('knowledgeTableBody').addEventListener('click', (e) => {
-                const sendBtn = e.target.closest('.send-btn');
+                if (deleteBtn) { deleteId = parseInt(deleteBtn.dataset.id); openModal(confirmModal); }
                 if (sendBtn) showToast(`Mensagem enviada para ${sendBtn.dataset.name}!`);
             });
-             document.getElementById('addKnowledgeBtn').addEventListener('click', () => {
-                // Lógica para abrir modal de adição
-             });
+            document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+                knowledgeData = knowledgeData.filter(i => i.id !== deleteId);
+                closeModal(confirmModal); showToast('Registro excluído com sucesso!');
+                populateFilters(); applyFiltersAndRender();
+            });
+            knowledgeForm.addEventListener('submit', handleFormSubmit);
+            knowledgeForm.querySelector('#level').addEventListener('input', e => document.getElementById('levelValue').textContent = e.target.value);
+            
+            ['collaboratorFilter', 'topicFilter', 'chartTypeSelector'].forEach(id => {
+                document.getElementById(id).addEventListener('change', e => {
+                    const key = id.includes('collab') ? 'collaborator' : id.includes('topic') ? 'topic' : 'chartType';
+                    currentFilters[key] = e.target.value;
+                    if (key === 'collaborator' && e.target.value !== 'all') {
+                        document.getElementById('chartTypeSelector').value = 'radar';
+                        currentFilters.chartType = 'radar';
+                    }
+                    applyFiltersAndRender();
+                });
+            });
+            ['exportCsvBtn', 'exportXlsxBtn'].forEach(id => {
+                document.getElementById(id).addEventListener('click', () => {
+                    const data = knowledgeData.filter(i => (currentFilters.collaborator==='all' || i.name===currentFilters.collaborator) && (currentFilters.topic==='all' || i.topic===currentFilters.topic));
+                    if(!data.length){ showToast("Não há dados para exportar."); return; }
+                    const worksheet = XLSX.utils.json_to_sheet(data);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Conhecimentos");
+                    XLSX.writeFile(workbook, `KnowMap_Export_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.${id.includes('Csv') ? 'csv':'xlsx'}`);
+                });
+            });
         };
 
-        // --- LÓGICA DO GRÁFICO DE MONITORAMENTO ---
-        const setupEngagementChart = () => {
-             const chartCanvas = document.getElementById('engagementChart');
-             if (chartCanvas) {
-                new Chart(chartCanvas.getContext('2d'), { type: 'line',
-                    data: { labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-                        datasets: [{ label: 'Horas de Treinamento', data: [12, 19, 25, 35], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }]
-                    }, options: { responsive: true, maintainAspectRatio: false }
-                });
-             }
+        // --- MÓDULO: MONITORAMENTO ---
+        const initMonitoringModule = () => {
+            new Chart(document.getElementById('engagementChart').getContext('2d'), { type: 'line',
+                data: { labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'], datasets: [{ label: 'Horas de Treinamento', data: [12, 19, 25, 35], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+            const scores = knowledgeData.reduce((acc, item) => {
+                acc[item.name] = (acc[item.name] || 0) + item.level;
+                return acc;
+            }, {});
+            const ranked = Object.entries(scores).sort(([,a],[,b]) => b-a);
+            document.getElementById('top-performer-kpi').innerHTML = `<p class="text-sm text-slate-500 mb-2">Colaborador Destaque</p><p class="text-xl font-bold text-slate-800">${ranked[0]?.[0] || 'N/A'}</p>`;
+            document.getElementById('ranking-list').innerHTML = ranked.map(([name, score], i) => `
+                <div class="flex items-center justify-between py-3 ${i < ranked.length - 1 ? 'border-b border-slate-100' : ''}">
+                    <div class="flex items-center gap-3"><span class="font-bold text-sm w-5 text-center">${i+1}</span><span class="font-medium text-slate-700">${name}</span></div>
+                    <span class="font-bold text-indigo-600">${score} pts</span>
+                </div>`).join('');
         };
+        
+        // --- FUNÇÕES GLOBAIS ---
+        const showToast = (message) => {
+            const toast = document.getElementById('toast-notification'), msgEl = document.getElementById('toast-message');
+            msgEl.textContent = message; toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+        document.getElementById('globalSearchInput').addEventListener('input', e => {
+            const term = e.target.value.toLowerCase();
+            if (!document.getElementById('view-mapa').classList.contains('hidden')) {
+                const data = knowledgeData.filter(i => Object.values(i).some(v => String(v).toLowerCase().includes(term)));
+                renderTable(data);
+            } else {
+                 document.querySelectorAll('.library-card').forEach(card => {
+                    card.style.display = card.dataset.title.toLowerCase().includes(term) ? '' : 'none';
+                });
+            }
+        });
 
         // --- INICIALIZAÇÃO ---
-        const init = () => {
-            lucide.createIcons();
-            switchView('biblioteca');
-        };
-
-        init();
+        renderLibrary();
+        switchView('biblioteca');
+        document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('-translate-x-full'));
     });
     </script>
 </body>
 </html>
-
-
-
 
